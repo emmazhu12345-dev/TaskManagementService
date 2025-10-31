@@ -14,6 +14,7 @@ on:
       - 'pom.xml'
       - '.github/workflows/**'
 
+# Cancel previous runs for the same ref to keep the queue clean
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
@@ -47,6 +48,15 @@ jobs:
         run: mvn -B -ntp clean verify jacoco:report -Dspotless.check.skip=true
 
       # Always upload Surefire reports to help debugging failing tests
+      # Style / lint (fail fast if style breaks)
+#      - name: Run Spotless & Checkstyle
+#        run: mvn -B -ntp spotless:check checkstyle:check
+
+      # Unit tests + coverage (HTML at target/site/jacoco/index.html)
+      - name: Run unit tests with coverage
+        run: mvn -B -ntp clean test verify jacoco:report
+
+      # Always upload test reports for debugging
       - name: Upload Surefire reports
         if: always()
         uses: actions/upload-artifact@v4
