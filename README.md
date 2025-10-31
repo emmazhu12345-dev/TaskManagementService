@@ -75,3 +75,9 @@ curl -X POST http://localhost:8080/api/notes \
 
 ### List notes
 curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/notes
+
+
+### Unit tests
+```
+mvn -q -DskipTests=false test
+```
