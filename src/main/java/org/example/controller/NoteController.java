@@ -12,38 +12,42 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/notes")
 public class NoteController {
 
-    private final NoteService noteService;
+  private final NoteService noteService;
 
-    public NoteController(NoteService noteService) {
-        this.noteService = noteService;
-    }
+  public NoteController(NoteService noteService) {
+    this.noteService = noteService;
+  }
 
-    public record UpsertNote(String title, String content) {}
+  public record UpsertNote(String title, String content) {}
 
-    @GetMapping
-    public Page<Note> list(@AuthenticationPrincipal UserDetails principal,
-                           @RequestParam(defaultValue = "0") int page,
-                           @RequestParam(defaultValue = "10") int size) {
-        return noteService.listMyNotes(principal.getUsername(), PageRequest.of(page, size));
-    }
+  @GetMapping
+  public Page<Note> list(
+      @AuthenticationPrincipal UserDetails principal,
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10") int size) {
+    return noteService.listMyNotes(principal.getUsername(), PageRequest.of(page, size));
+  }
 
-    @PostMapping
-    public Note create(@AuthenticationPrincipal UserDetails principal, @RequestBody UpsertNote body) {
-        return noteService.create(principal.getUsername(), body.title(), body.content());
-    }
+  @PostMapping
+  public Note create(@AuthenticationPrincipal UserDetails principal, @RequestBody UpsertNote body) {
+    return noteService.create(principal.getUsername(), body.title(), body.content());
+  }
 
-    @GetMapping("/{id}")
-    public Note one(@AuthenticationPrincipal UserDetails principal, @PathVariable Long id) {
-        return noteService.getOne(principal.getUsername(), id);
-    }
+  @GetMapping("/{id}")
+  public Note one(@AuthenticationPrincipal UserDetails principal, @PathVariable Long id) {
+    return noteService.getOne(principal.getUsername(), id);
+  }
 
-    @PutMapping("/{id}")
-    public Note update(@AuthenticationPrincipal UserDetails principal, @PathVariable Long id, @RequestBody UpsertNote body) {
-        return noteService.update(principal.getUsername(), id, body.title(), body.content());
-    }
+  @PutMapping("/{id}")
+  public Note update(
+      @AuthenticationPrincipal UserDetails principal,
+      @PathVariable Long id,
+      @RequestBody UpsertNote body) {
+    return noteService.update(principal.getUsername(), id, body.title(), body.content());
+  }
 
-    @DeleteMapping("/{id}")
-    public void delete(@AuthenticationPrincipal UserDetails principal, @PathVariable Long id) {
-        noteService.delete(principal.getUsername(), id);
-    }
+  @DeleteMapping("/{id}")
+  public void delete(@AuthenticationPrincipal UserDetails principal, @PathVariable Long id) {
+    noteService.delete(principal.getUsername(), id);
+  }
 }
