@@ -42,7 +42,7 @@ public class NoteService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         // Use constructor instead of setters
-        Note note = new Note(title, content, owner);
+        Note note = new Note(title, content, owner.getId());
         return notesRepo.save(note);
     }
 

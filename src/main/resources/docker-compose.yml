@@ -1,22 +1,22 @@
+version: "3.9"
 services:
   postgres:
     image: postgres:16
-    container_name: local-postgres-16
+    container_name: tms-postgres
     environment:
-      POSTGRES_USER: demo
-      POSTGRES_PASSWORD: demo
-      POSTGRES_DB: demo
+      POSTGRES_DB: tmsdb
+      POSTGRES_USER: tmsuser
+      POSTGRES_PASSWORD: tmspass
+      TZ: UTC
     ports:
       - "5432:5432"
     volumes:
       - pg_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U demo -d demo"]
+      test: ["CMD-SHELL", "pg_isready -U tmsuser -d tmsdb"]
       interval: 5s
       timeout: 3s
       retries: 10
-    # Apple Silicon/Intel 都无需额外 platform 指定，除非你的 Docker 特别老旧：
-    # platform: linux/arm64
 
 volumes:
   pg_data:

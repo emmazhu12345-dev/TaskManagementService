@@ -3,11 +3,6 @@ spring:
     url: jdbc:postgresql://localhost:5432/notes
     username: notes
     password: notes_password
-  jpa:
-    hibernate:
-      ddl-auto: validate
-    show-sql: false
-
-server:
-  compression:
-    enabled: true
+  sql:
+    init:
+      mode: never

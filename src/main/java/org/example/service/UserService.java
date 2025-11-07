@@ -43,13 +43,13 @@ public class UserService {
         Note welcome = new Note(
                 "Welcome",
                 "Welcome to Note Service, " + saved.getUsername() + "!",
-                saved
+                saved.getId()
         );
         notesRepo.save(welcome);
     }
 
     public AppUser createUser(AppUser user) {
-        return usersRepo.save(user);
+        return usersRepo.createUser(user);
     }
 
     // Get all users
