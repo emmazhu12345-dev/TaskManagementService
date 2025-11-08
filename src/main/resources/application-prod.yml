@@ -1,8 +1,35 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/notes
-    username: notes
-    password: notes_password
+    # If you changed the published port to 15432, update host:port here accordingly.
+    url: jdbc:postgresql://localhost:5432/tmsdb
+    username: tmsuser
+    password: tmspass
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      idle-timeout: 600000
+      connection-timeout: 30000
+
+  # Flyway manages schema in prod
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    # clean-disabled: true   # keep true in real production to prevent accidental clean
+
+  # schema managed by Flyway; do not run Spring SQL init in prod
   sql:
     init:
       mode: never
+
+server:
+  port: 8080
+
+jwt:
+  secret: "change-this-very-long-secret-please-make-it-longer-32bytes-minimum"
+  ttl-minutes: 60
+
+logging:
+  level:
+    org.springframework.security: INFO
+    org.flywaydb: INFO
