@@ -1,17 +1,25 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:notesdb;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1
-    username: sa
-    password:
+    url: jdbc:postgresql://localhost:5433/tmsdb_dev
+    username: tmsuser
+    password: tmspass
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 1
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration   # 与 prod 完全相同
+    baseline-on-migrate: true
+
   sql:
     init:
-      mode: always     # <-- run schema.sql & data.sql
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
+      mode: never
+
+server:
+  port: 8080
 
 logging:
   level:
-    org.springframework.jdbc.core: DEBUG
+    org.flywaydb: INFO
     org.springframework.security: DEBUG

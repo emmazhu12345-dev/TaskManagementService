@@ -119,11 +119,30 @@ docker ps        # check that tms-postgres is healthy
 
 ## Run in dev mode
 mvn spring-boot:run -Dspring-boot.run.profiles=dev
+
+###
+ssh to dev db docker
+```
+docker exec -it tms-postgres-dev bash
+
+psql -U tmsuser -d tmsdb-dev
+```
+
+
+#### doesn't work
 H2 Console: http://localhost:8080/h2-console
 JDBC URL: jdbc:h2:mem:notesdb
 
 ## Run in prod mode
 mvn -U spring-boot:run -Dspring-boot.run.profiles=prod
+
+###
+ssh to prod db docker
+```
+docker exec -it tms-postgres bash
+
+psql -U tmsuser -d tmsdb
+```
 
 ### or build & run:
 mvn clean package -DskipTests

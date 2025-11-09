@@ -31,5 +31,5 @@ jwt:
 
 logging:
   level:
-    org.springframework.security: INFO
+    org.springframework.security: DEBUG
     org.flywaydb: INFO

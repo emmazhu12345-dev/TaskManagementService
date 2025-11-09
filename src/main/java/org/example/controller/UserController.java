@@ -3,12 +3,14 @@ package org.example.controller;
 
 import org.example.model.AppUser;
 import org.example.service.UserService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/users")
+@Deprecated
 public class UserController {
 
     private final UserService userService;
@@ -22,11 +24,5 @@ public class UserController {
     @PostMapping
     public AppUser createUser(@RequestBody AppUser user) {
         return userService.createUser(user);
-    }
-
-    // GET /users → Get all users
-    @GetMapping
-    public List<AppUser> getAllUsers() {
-        return userService.getAllUsers();
     }
 }
