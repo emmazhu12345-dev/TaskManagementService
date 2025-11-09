@@ -134,6 +134,9 @@ java -Dspring.profiles.active=prod -jar target/TaskManagementService-1.0.0.jar
 ### Stop and remove containers
 docker compose down
 
+if want to deleting the volumes: 
+docker compose down -v
+
 ### View container logs
 docker logs tms-postgres
 
