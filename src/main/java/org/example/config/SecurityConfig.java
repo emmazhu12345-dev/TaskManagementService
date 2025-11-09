@@ -70,6 +70,7 @@ public class SecurityConfig {
                 .authenticationProvider(authProvider)
                 .authorizeHttpRequests(reg -> {
                     reg.requestMatchers("/api/auth/**", "/h2-console/**").permitAll();
+                    reg.requestMatchers("/api/auth/logout").authenticated();
                     // Make debug endpoints public in dev only:
                     if (env.matchesProfiles("dev")) {
                         reg.requestMatchers("/api/debug/**", "/api/notes/**").permitAll();

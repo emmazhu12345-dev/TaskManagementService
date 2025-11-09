@@ -2,6 +2,7 @@ package org.example.auth;
 
 
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -39,5 +40,18 @@ public class JwtService {
                 .parseClaimsJws(token)
                 .getBody()
                 .getSubject();
+    }
+
+    public Long extractExpirationMillis(String token) {
+        try {
+            Claims claims = Jwts.parser()
+                    .setSigningKey(secret.getBytes())
+                    .parseClaimsJws(token)
+                    .getBody();
+            Date exp = claims.getExpiration();
+            return exp != null ? exp.getTime() : null;
+        } catch (Exception e) {
+            return null;
+        }
     }
 }
