@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: tms-postgres
+    environment:
+      POSTGRES_DB: tmsdb
+      POSTGRES_USER: tmsuser
+      POSTGRES_PASSWORD: tmspass
+      TZ: UTC
+    ports:
+      - "5432:5432"            # if 5432 is occupied locally, change to "15432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tmsuser -d tmsdb"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # Optional: pgAdmin UI at http://localhost:5050
+  # pgadmin:
+  #   image: dpage/pgadmin4:8
+  #   container_name: tms-pgadmin
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: admin@example.com
+  #     PGADMIN_DEFAULT_PASSWORD: admin123
+  #   ports:
+  #     - "5050:80"
+
+volumes:
+  pg_data:

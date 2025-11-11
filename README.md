@@ -105,5 +105,41 @@ mvn spotless:apply     # auto-fix formatting locally
 
 ## Skip the formattting test
 mvn clean verify -Dspotless.check.skip=true
-
 ```
+
+# Run PostgreSQL via Docker to start database
+Flyway will scan classpath:db/migration by default,
+all files under resources/db/migration must start with V{version}__{description}.sql
+
+## Using Docker Compose
+```bash
+docker compose up -d
+docker ps        # check that tms-postgres is healthy
+```
+
+## Run in dev mode
+mvn spring-boot:run -Dspring-boot.run.profiles=dev
+H2 Console: http://localhost:8080/h2-console
+JDBC URL: jdbc:h2:mem:notesdb
+
+## Run in prod mode
+mvn -U spring-boot:run -Dspring-boot.run.profiles=prod
+
+### or build & run:
+mvn clean package -DskipTests
+java -Dspring.profiles.active=prod -jar target/TaskManagementService-1.0.0.jar
+
+
+## Useful docker commands
+### Stop and remove containers
+docker compose down
+
+if want to deleting the volumes: 
+docker compose down -v
+
+### View container logs
+docker logs tms-postgres
+
+### Enter PostgreSQL container shell
+docker exec -it tms-postgres bash
+psql -U tmsuser -d tmsdb

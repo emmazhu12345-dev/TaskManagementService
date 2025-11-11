@@ -32,8 +32,8 @@ public class SecurityConfig {
 
     /** Bridge repository user to Spring Security's UserDetails. */
     @Bean
-    public UserDetailsService userDetailsService(UserRepository users) {
-        return username -> users.findByUsername(username)
+    public UserDetailsService userDetailsService(UserRepository usersRepo) {
+        return username -> usersRepo.findByUsername(username)
                 .map(u -> org.springframework.security.core.userdetails.User
                         .withUsername(u.getUsername())
                         .password(u.getPasswordHash())

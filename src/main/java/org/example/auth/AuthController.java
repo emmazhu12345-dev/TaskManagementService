@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    public record RegisterRequest(String username, String password) {}
+    public record RegisterRequest(String username, String email, String password) {}
     public record LoginRequest(String username, String password) {}
     public record TokenResponse(String token) {}
 
@@ -27,7 +27,7 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<Void> register(@RequestBody RegisterRequest req) {
         // TODO: add email address
-        userService.register(req.username(),req.username() + "@example.com", req.password());
+        userService.register(req.username(), req.email(), req.password());
         return ResponseEntity.ok().build();
     }
 

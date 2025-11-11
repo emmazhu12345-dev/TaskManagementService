@@ -12,7 +12,6 @@ import java.time.Instant;
  * Uses constructor-based initialization for cleaner creation,
  * but keeps a no-args constructor for JPA compatibility.
  */
-@Entity
 @Getter
 @Setter
 @NoArgsConstructor // JPA requires a no-args constructor
@@ -22,26 +21,23 @@ public class Note {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
     private String title;
 
     @Column(columnDefinition = "text")
     private String content;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    private AppUser owner;
+    private Long ownerId;       // store FK id directly (no ORM)
 
-    @Column(nullable = false)
     private Instant createdAt = Instant.now();
 
     /**
      * Custom constructor for easy creation.
      * This is used in the service layer instead of setter chaining.
      */
-    public Note(String title, String content, AppUser owner) {
+    public Note(String title, String content, Long ownerId) {
         this.title = title;
         this.content = content;
-        this.owner = owner;
+        this.ownerId = ownerId;
         this.createdAt = Instant.now();
     }
 }
