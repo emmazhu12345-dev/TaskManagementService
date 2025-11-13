@@ -39,6 +39,9 @@ public class AdminController {
 
     @PostMapping("/users/role")
     public void setRole(@RequestBody UpdateRoleRequest req) {
+        // todo: HOMEWORK Solve no admin issue
+        // 1. last admin, cannot update
+        // or disallow admin downgrade themselves to member
         userService.setRole(req.id(), req.role());
     }
 
