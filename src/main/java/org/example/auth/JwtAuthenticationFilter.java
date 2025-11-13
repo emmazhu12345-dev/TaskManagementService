@@ -6,6 +6,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.example.service.TokenBlocklistService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -19,10 +21,14 @@ import java.io.IOException;
 
 /**
  * Validates Bearer tokens and sets SecurityContext.
- * Continues the chain regardless of token status.
+ * - Access tokens: used to authenticate and set SecurityContext
+ * - Refresh tokens: allowed ONLY for /api/auth/refresh, never used to authenticate
+ * Continues the chain regardless of token status (except explicit 401 cases).
  */
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+    private static final Logger log = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
@@ -38,14 +44,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.tokenBlocklistService = tokenBlocklistService;
     }
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(JwtAuthenticationFilter.class);
-
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        log.debug("JWT filter path={}", request.getRequestURI());
+        String path = request.getRequestURI();
+        log.debug("JWT filter path={}", path);
 
         // If already authenticated, continue
         if (SecurityContextHolder.getContext().getAuthentication() != null) {
@@ -61,26 +66,60 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = authHeader.substring(7);
 
-        // Check blocklist first
+        // 1) Blocklist check for ALL tokens (access & refresh)
         if (tokenBlocklistService.isBlocked(token)) {
+            log.debug("Token is in blocklist");
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.getWriter().write("Token has been invalidated. Please log in again.");
             return;
         }
 
         try {
+            // 2) Distinguish access vs refresh
+            boolean isAccessToken = jwtService.isTokenType(token, "access");
+            boolean isRefreshToken = jwtService.isTokenType(token, "refresh");
+
+            // For refresh tokens:
+            if (isRefreshToken) {
+                // Only allowed on the refresh endpoint; never used to set authentication
+                if (path.startsWith("/api/auth/refresh")) {
+                    log.debug("Refresh token used on /api/auth/refresh, skipping authentication setup");
+                    filterChain.doFilter(request, response);
+                    return;
+                } else {
+                    log.debug("Refresh token used on non-refresh endpoint, rejecting");
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.getWriter().write("Refresh token cannot be used to access this resource.");
+                    return;
+                }
+            }
+
+            // If it's not an access token (unknown typ), just continue without authentication
+            if (!isAccessToken) {
+                log.debug("Token type is not access/refresh, skipping authentication");
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            // 3) Access token flow: validate & set SecurityContext
             String username = jwtService.parseUsername(token);
             log.debug("Parsed username={}", username);
+
             if (username != null && !username.isBlank()) {
                 var userDetails = userDetailsService.loadUserByUsername(username);
+
+                // Optional：Can check if the token is expired, reject the request fast
+                // if (jwtService.isTokenExpired(token)) { ... }
+
                 var authentication = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                log.debug("Authentication set for {}", username);
             }
-            log.debug("Authentication set for {}", username);
         } catch (JwtException | IllegalArgumentException ex) {
-            // Invalid or expired token: ignore and continue
+            // Invalid or expired token: ignore and continue (no auth set)
             log.debug("JWT invalid: {}", ex.getMessage());
         }
 
