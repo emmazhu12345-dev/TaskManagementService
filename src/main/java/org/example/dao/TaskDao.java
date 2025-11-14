@@ -15,5 +15,5 @@ public interface TaskDao {
         VALUES (:ownerId, :title, :description, :status, :priority, :dueDate)
     """)
     @GetGeneratedKeys("id")
-    long insert(@BindBean Task task);
+    long insertTask(@BindBean Task task);
 }

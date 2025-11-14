@@ -4,5 +4,5 @@ import org.example.model.Task;
 
 public interface TaskRepository {
 
-    Task create(Task task);
+    Task createTask(Task task);
 }

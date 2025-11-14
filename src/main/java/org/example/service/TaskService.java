@@ -43,7 +43,7 @@ public class TaskService {
         task.setCreatedAt(now);
         task.setUpdatedAt(now);
 
-        Task saved = taskRepository.create(task);
+        Task saved = taskRepository.createTask(task);
         return TaskMapper.toResponse(saved);
     }
 
