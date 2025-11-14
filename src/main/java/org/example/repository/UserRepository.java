@@ -5,7 +5,6 @@ import org.example.model.Role;
 import java.util.List;
 import java.util.Optional;
 
-
 public interface UserRepository {
     Optional<AppUser> findByUsername(String username);
     boolean existsByUsername(String username);

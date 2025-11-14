@@ -1,5 +1,6 @@
 package org.example.config;
 
+import org.example.auth.CustomUserPrincipal;
 import org.example.auth.JwtAuthenticationFilter;
 import org.example.repository.UserRepository;
 import org.springframework.context.annotation.Bean;
@@ -13,6 +14,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -21,6 +23,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import java.util.List;
 
 /** Security configuration: JWT + username/password auth. */
 @Configuration
@@ -36,12 +40,18 @@ public class SecurityConfig {
     @Bean
     public UserDetailsService userDetailsService(UserRepository usersRepo) {
         return username -> usersRepo.findByUsername(username)
-                .map(user -> User
-                        .withUsername(user.getUsername())
-                        .password(user.getPasswordHash())
-                        .authorities("ROLE_" + user.getRole().name())   // ROLE_ADMIN / ROLE_MEMBER
-                        .disabled(!user.isActive())
-                        .build())
+                .map(user -> {
+                    var authorities = List.of(
+                            new SimpleGrantedAuthority("ROLE_" + user.getRole().name())
+                    );
+                    return new CustomUserPrincipal(
+                            user.getId(),
+                            user.getUsername(),
+                            user.getPasswordHash(),
+                            authorities,
+                            user.isActive()
+                    );
+                })
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
