@@ -6,5 +6,8 @@ import org.springframework.stereotype.Service;
 @Profile("prod")
 @Service
 public class ProdWelcomeMessageService implements WelcomeMessageService {
-    @Override public String message() { return "🚀 Running in PROD mode"; }
+  @Override
+  public String message() {
+    return "🚀 Running in PROD mode";
+  }
 }
