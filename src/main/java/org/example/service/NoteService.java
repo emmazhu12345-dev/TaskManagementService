@@ -1,16 +1,20 @@
 package org.example.service;
 
 import lombok.val;
+import org.example.dao.NoteDao;
 import org.example.model.AppUser;
 import org.example.model.Note;
 import org.example.repository.NoteRepository;
 import org.example.repository.UserRepository;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
 
 /**
  * NoteService handles all business logic for notes.
@@ -25,6 +29,11 @@ public class NoteService {
     public NoteService(NoteRepository notes, UserRepository usersRepo) {
         this.notesRepo = notes;
         this.usersRepo = usersRepo;
+    }
+
+    /** Admin: list all notes (paged). */
+    public Page<Note> listNotes(Pageable pageable) {
+        return notesRepo.findAll(pageable);
     }
 
     /** List all notes for the authenticated user. */

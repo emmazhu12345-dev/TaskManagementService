@@ -2,6 +2,7 @@ package org.example.repository.impl;
 
 import org.example.dao.AppUserDao;
 import org.example.model.AppUser;
+import org.example.model.Role;
 import org.example.repository.UserRepository;
 import org.jdbi.v3.core.Jdbi;
 import org.springframework.stereotype.Repository;
@@ -49,5 +50,17 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public Optional<Long> findIdByUsername(String username) {
         return jdbi.withExtension(AppUserDao.class, dao -> dao.findIdByUsername(username));
+    }
+
+    @Override
+    public void setRole(Long userId, Role role) {
+        int n = jdbi.withExtension(AppUserDao.class, dao -> dao.updateRole(userId, role.name()));
+        if (n == 0) throw new IllegalArgumentException("User not found");
+    }
+
+    @Override
+    public void setActive(Long userId, boolean active) {
+        int n = jdbi.withExtension(AppUserDao.class, dao -> dao.updateActive(userId, active));
+        if (n == 0) throw new IllegalArgumentException("User not found");
     }
 }

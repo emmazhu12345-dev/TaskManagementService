@@ -13,7 +13,9 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -34,12 +36,13 @@ public class SecurityConfig {
     @Bean
     public UserDetailsService userDetailsService(UserRepository usersRepo) {
         return username -> usersRepo.findByUsername(username)
-                .map(u -> org.springframework.security.core.userdetails.User
-                        .withUsername(u.getUsername())
-                        .password(u.getPasswordHash())
-                        .authorities("ROLE_USER")
+                .map(user -> User
+                        .withUsername(user.getUsername())
+                        .password(user.getPasswordHash())
+                        .authorities("ROLE_" + user.getRole().name())   // ROLE_ADMIN / ROLE_MEMBER
+                        .disabled(!user.isActive())
                         .build())
-                .orElseThrow(() -> new org.springframework.security.core.userdetails.UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
     @Bean
@@ -70,7 +73,6 @@ public class SecurityConfig {
                     // Make debug endpoints public in dev only:
                     if (env.matchesProfiles("dev")) {
                         reg.requestMatchers("/api/debug/**", "/api/notes/**").permitAll();
-                        reg.requestMatchers("/api/notes/**").permitAll();
                     }
                     reg.anyRequest().authenticated();
                 })

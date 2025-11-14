@@ -2,6 +2,7 @@ package org.example.service;
 
 import org.example.model.AppUser;
 import org.example.model.Note;
+import org.example.model.Role;
 import org.example.repository.NoteRepository;
 import org.example.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -35,7 +36,9 @@ public class UserService {
         AppUser user = new AppUser(
                 username,
                 email,
-                encoderRepo.encode(rawPassword)
+                encoderRepo.encode(rawPassword),
+                Role.MEMBER,
+                true
         );
 
         AppUser saved = createUser(user);
@@ -55,5 +58,13 @@ public class UserService {
     // Get all users
     public List<AppUser> getAllUsers() {
         return usersRepo.findAll();
+    }
+
+    public void setRole(Long userId, Role role) {
+        usersRepo.setRole(userId, role);
+    }
+
+    public void setActive(Long userId, boolean active) {
+        usersRepo.setActive(userId, active);
     }
 }

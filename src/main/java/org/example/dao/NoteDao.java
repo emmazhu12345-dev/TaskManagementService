@@ -47,4 +47,14 @@ public interface NoteDao {
     DELETE FROM note WHERE id = :id AND owner_id = :ownerId
   """)
     int deleteOwned(@Bind("id") Long id, @Bind("ownerId") Long ownerId);
+
+    @SqlQuery("""
+    SELECT * FROM note
+    ORDER BY id DESC
+    LIMIT :limit OFFSET :offset
+  """)
+    List<Note> findAllPaged(@Bind("limit") int limit, @Bind("offset") int offset);
+
+    @SqlQuery("SELECT COUNT(*) FROM note")
+    long countAll();
 }

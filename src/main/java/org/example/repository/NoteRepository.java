@@ -10,4 +10,6 @@ public interface NoteRepository {
     Optional<Note> findByIdAndOwnerId(Long id, Long ownerId);
     Note save(Note note);
     void delete(Note note);
+    // Admin use case: list all notes paged
+    Page<Note> findAll(Pageable pageable);
 }

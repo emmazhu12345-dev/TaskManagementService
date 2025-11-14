@@ -64,4 +64,15 @@ public class NoteRepositoryImpl implements NoteRepository {
             throw new IllegalStateException("Delete failed (not found or not owner).");
         }
     }
+
+    @Override
+    public Page<Note> findAll(Pageable pageable) {
+        int size = pageable.getPageSize();
+        int offset = pageable.getPageNumber() * size;
+
+        List<Note> content = jdbi.withExtension(NoteDao.class, dao -> dao.findAllPaged(size, offset));
+        long total = jdbi.withExtension(NoteDao.class, NoteDao::countAll);
+
+        return new PageImpl<>(content, pageable, total);
+    }
 }
