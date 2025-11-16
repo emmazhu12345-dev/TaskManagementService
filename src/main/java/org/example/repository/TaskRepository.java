@@ -1,6 +1,9 @@
 package org.example.repository;
 
+import org.example.dto.PagedResponse;
 import org.example.model.Task;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,7 +15,7 @@ public interface TaskRepository {
 
     Task createTask(Task task);
 
-    List<Task> findTasksByOwner(long ownerId);
+    PagedResponse<Task> findTasksByOwner(long ownerId, Pageable pageable);
 
     Optional<Task> findTaskByIdAndOwner(long taskId, long ownerId);
 

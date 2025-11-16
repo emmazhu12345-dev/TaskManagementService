@@ -3,10 +3,14 @@ package org.example.controller;
 
 import org.example.auth.CustomUserPrincipal;
 import org.example.dto.CreateTaskRequest;
+import org.example.dto.PagedResponse;
 import org.example.dto.TaskResponse;
 import org.example.dto.UpdateTaskRequest;
 import org.example.dto.UpdateTaskStatusRequest;
+import org.example.model.AppUser;
 import org.example.service.TaskService;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,12 +45,15 @@ public class TaskController {
     // List all Tasks for current user
     // ======================================
     @GetMapping
-    public List<TaskResponse> listTasks(
-            @AuthenticationPrincipal CustomUserPrincipal user
+    public PagedResponse<TaskResponse> listMyTasks(
+            @AuthenticationPrincipal CustomUserPrincipal user,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
     ) {
-        long ownerId = user.getId();
-        return taskService.listTasks(ownerId);
+        Pageable pageable = PageRequest.of(page, size);
+        return taskService.listTasksForUser(user.getId(), pageable);
     }
+
 
     // ======================================
     // Get a single Task

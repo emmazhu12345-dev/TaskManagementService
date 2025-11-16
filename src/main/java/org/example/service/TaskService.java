@@ -2,12 +2,17 @@
 package org.example.service;
 
 import org.example.dto.CreateTaskRequest;
+import org.example.dto.PagedResponse;
 import org.example.dto.TaskResponse;
 import org.example.dto.UpdateTaskRequest;
 import org.example.dto.UpdateTaskStatusRequest;
 import org.example.model.Task;
 import org.example.model.TaskStatus;
 import org.example.repository.TaskRepository;
+import org.example.utils.TaskMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,12 +55,22 @@ public class TaskService {
     // ===================================================
     // List all tasks for the user
     // ===================================================
-    @Transactional(readOnly = true)
-    public List<TaskResponse> listTasks(long ownerId) {
-        return taskRepository.findTasksByOwner(ownerId)
-                .stream()
-                .map(this::toResponse)
+    public PagedResponse<TaskResponse> listTasksForUser(long ownerId, Pageable pageable) {
+        PagedResponse<Task> pageResult = taskRepository.findTasksByOwner(ownerId, pageable);
+
+        List<TaskResponse> content = pageResult.content().stream()
+                .map(TaskMapper::toResponse)
                 .toList();
+
+        return new PagedResponse<>(
+                content,
+                pageResult.page(),
+                pageResult.size(),
+                pageResult.totalElements(),
+                pageResult.totalPages(),
+                pageResult.hasNext(),
+                pageResult.hasPrevious()
+        );
     }
 
     // ===================================================

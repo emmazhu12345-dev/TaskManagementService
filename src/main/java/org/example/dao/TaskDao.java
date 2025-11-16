@@ -24,13 +24,27 @@ public interface TaskDao {
     @GetGeneratedKeys("id")
     long insertTask(@BindBean Task task);
 
+    // 1. find the current page for user
     @SqlQuery("""
         SELECT *
         FROM task
         WHERE owner_id = :ownerId
         ORDER BY created_at DESC
+        LIMIT :limit OFFSET :offset
     """)
-    List<Task> findTasksByOwner(@Bind("ownerId") long ownerId);
+    List<Task> findTasksByOwnerPaged(
+            @Bind("ownerId") long ownerId,
+            @Bind("limit") int limit,
+            @Bind("offset") int offset
+    );
+
+    // ✅ 2. find the total number of task for the user
+    @SqlQuery("""
+        SELECT COUNT(*)
+        FROM task
+        WHERE owner_id = :ownerId
+    """)
+    long countTasksByOwner(@Bind("ownerId") long ownerId);
 
     @SqlQuery("""
         SELECT *
