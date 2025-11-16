@@ -76,7 +76,7 @@ public class TaskController {
     // ======================================
     // Update only Task status
     // ======================================
-    @PatchMapping("/{id}/status")
+    @PatchMapping("/status/{id}")
     public TaskResponse updateTaskStatus(
             @AuthenticationPrincipal CustomUserPrincipal user,
             @PathVariable long id,
