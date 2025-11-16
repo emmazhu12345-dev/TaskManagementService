@@ -73,7 +73,7 @@ public class TaskService {
     // ===================================================
     @Transactional
     public TaskResponse updateTask(long ownerId, long taskId, UpdateTaskRequest request) {
-        Task task = taskRepository.findByIdAndOwner(taskId, ownerId)
+        Task task = taskRepository.findTaskByIdAndOwner(taskId, ownerId)
                 .orElseThrow(() -> new IllegalArgumentException("Task not found"));
 
         task.setTitle(request.title());
@@ -83,7 +83,7 @@ public class TaskService {
         task.setDueDate(request.dueDate());
         task.setUpdatedAt(Instant.now());
 
-        boolean updated = taskRepository.update(task);
+        boolean updated = taskRepository.updateTask(task);
         if (!updated) {
             throw new IllegalStateException("Failed to update task");
         }
@@ -95,13 +95,13 @@ public class TaskService {
     // ===================================================
     @Transactional
     public TaskResponse updateTaskStatus(long ownerId, long taskId, UpdateTaskStatusRequest request) {
-        Task task = taskRepository.findByIdAndOwner(taskId, ownerId)
+        Task task = taskRepository.findTaskByIdAndOwner(taskId, ownerId)
                 .orElseThrow(() -> new IllegalArgumentException("Task not found"));
 
         task.setStatus(request.status());
         task.setUpdatedAt(Instant.now());
 
-        boolean updated = taskRepository.update(task);
+        boolean updated = taskRepository.updateTask(task);
         if (!updated) {
             throw new IllegalStateException("Failed to update task status");
         }
@@ -113,7 +113,7 @@ public class TaskService {
     // ===================================================
     @Transactional
     public void deleteTask(long ownerId, long taskId) {
-        boolean deleted = taskRepository.delete(taskId, ownerId);
+        boolean deleted = taskRepository.deleteTask(taskId, ownerId);
         if (!deleted) {
             throw new IllegalArgumentException("Task not found");
         }
