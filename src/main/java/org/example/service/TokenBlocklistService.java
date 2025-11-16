@@ -1,12 +1,10 @@
 package org.example.service;
 
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.time.Duration;
 
 /**
  * Keeps track of JWT tokens that have been explicitly blocked (logged out or revoked).
@@ -15,27 +13,37 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiredArgsConstructor
 public class TokenBlocklistService {
 
-    // token -> expiration timestamp (epoch millis)
-    private final Map<String, Long> blocklist = new ConcurrentHashMap<>();
+    private final StringRedisTemplate redis;
 
     /**
      * Add token to blocklist with its expiration time.
+     * Redis will auto-expire the token key.
      */
     public void blockToken(String token, long expiresAtMillis) {
-        blocklist.put(token, expiresAtMillis);
+        long now = System.currentTimeMillis();
+        long ttlMillis = expiresAtMillis - now;
+        if (ttlMillis <= 0) {
+            return; // already expired, no need to store
+        }
+
+        String key = buildRedisKey(token);
+
+        // value = expiration timestamp (optional, but keeps consistent with old interface)
+        redis.opsForValue().set(key, String.valueOf(expiresAtMillis),
+                Duration.ofMillis(ttlMillis));
     }
 
     /**
-     * Check whether the token is blocked.
-     * Also removes expired entries to avoid memory leaks.
+     * Check if token is in blocklist.
+     * We don't need to manually cleanup; Redis auto-expires.
      */
     public boolean isBlocked(String token) {
-        Long exp = blocklist.get(token);
-        if (exp == null) return false;
-        if (Instant.now().toEpochMilli() >= exp) {
-            blocklist.remove(token);
-            return false;
-        }
-        return true;
+        String key = buildRedisKey(token);
+        String val = redis.opsForValue().get(key);
+        return val != null;  // if key exists → token is blocked
+    }
+
+    private String buildRedisKey(String token) {
+        return "blocklist:" + token;
     }
 }

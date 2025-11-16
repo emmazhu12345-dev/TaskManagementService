@@ -16,6 +16,18 @@ spring:
     init:
       mode: never
 
+  data:
+    redis:
+      host: localhost      # 因为有 6379:6379 端口映射
+      port: 6379
+      database: 0          # 默认 0 即可， dev 用 db 0，prod 可以用 db 1，避免冲突
+
+  cache:
+    type: redis            # 如果你打算用 Spring Cache 把它当缓存
+    redis:
+      time-to-live: 600000 # 10 分钟，按需要改
+
+
 server:
   port: 8080
 

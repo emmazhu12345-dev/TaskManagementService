@@ -1,6 +1,5 @@
 spring:
   datasource:
-    # If you changed the published port to 15432, update host:port here accordingly.
     url: jdbc:postgresql://localhost:5432/tmsdb
     username: tmsuser
     password: tmspass
@@ -21,6 +20,19 @@ spring:
   sql:
     init:
       mode: never
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      # 密码本地可以不配，线上再加密码 + 环境变量
+      # password: ${TMS_REDIS_PASSWORD:}
+      database: 1              # ⚠️ 用 1，和 dev 的 db=0 做环境隔离
+
+  cache:
+    type: redis
+    redis:
+      time-to-live: 600000
 
 server:
   port: 8080
