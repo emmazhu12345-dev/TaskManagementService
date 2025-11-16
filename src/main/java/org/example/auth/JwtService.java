@@ -13,6 +13,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class JwtService {
@@ -37,11 +38,14 @@ public class JwtService {
     // ============================
     public String generateAccessToken(String username) {
         Instant now = Instant.now();
+        Instant expiry = now.plus(accessTtlMinutes, ChronoUnit.MINUTES);
+
         return Jwts.builder()
                 .setClaims(Map.of("typ", "access"))
                 .setSubject(username)
+                .setId(UUID.randomUUID().toString())          // <- add jti
                 .setIssuedAt(Date.from(now))
-                .setExpiration(Date.from(now.plus(accessTtlMinutes, ChronoUnit.MINUTES)))
+                .setExpiration(Date.from(expiry))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -51,11 +55,14 @@ public class JwtService {
     // ============================
     public String generateRefreshToken(String username) {
         Instant now = Instant.now();
+        Instant expiry = now.plus(refreshTtlDays, ChronoUnit.DAYS);
+
         return Jwts.builder()
                 .setClaims(Map.of("typ", "refresh"))
                 .setSubject(username)
+                .setId(UUID.randomUUID().toString())          // <- add jti
                 .setIssuedAt(Date.from(now))
-                .setExpiration(Date.from(now.plus(refreshTtlDays, ChronoUnit.DAYS)))
+                .setExpiration(Date.from(expiry))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -65,12 +72,14 @@ public class JwtService {
     // ============================
 
     public String parseUsername(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
+        return extractAllClaims(token).getSubject();
+    }
+
+    /**
+     * Extract JWT ID (jti) from token.
+     */
+    public String extractJti(String token) {
+        return extractAllClaims(token).getId();
     }
 
     public boolean isTokenExpired(String token) {

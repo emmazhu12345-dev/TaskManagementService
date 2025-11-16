@@ -1,49 +1,59 @@
 package org.example.service;
 
 import lombok.RequiredArgsConstructor;
+import org.example.auth.JwtService;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 
-/**
- * Keeps track of JWT tokens that have been explicitly blocked (logged out or revoked).
- */
 @Service
 @RequiredArgsConstructor
 public class TokenBlocklistService {
 
     private final StringRedisTemplate redis;
+    private final JwtService jwtService;
 
-    /**
-     * Add token to blocklist with its expiration time.
-     * Redis will auto-expire the token key.
-     */
     public void blockToken(String token, long expiresAtMillis) {
+        String username = jwtService.parseUsername(token);
+        String jti = jwtService.extractJti(token);
+
+        if (jti == null || jti.isBlank()) {
+            return;
+        }
+
         long now = System.currentTimeMillis();
         long ttlMillis = expiresAtMillis - now;
         if (ttlMillis <= 0) {
-            return; // already expired, no need to store
+            return;
         }
 
-        String key = buildRedisKey(token);
+        String key = buildRedisKey(username, jti);
 
-        // value = expiration timestamp (optional, but keeps consistent with old interface)
-        redis.opsForValue().set(key, String.valueOf(expiresAtMillis),
-                Duration.ofMillis(ttlMillis));
+        redis.opsForValue().set(
+                key,
+                String.valueOf(expiresAtMillis),
+                Duration.ofMillis(ttlMillis)
+        );
     }
 
-    /**
-     * Check if token is in blocklist.
-     * We don't need to manually cleanup; Redis auto-expires.
-     */
     public boolean isBlocked(String token) {
-        String key = buildRedisKey(token);
-        String val = redis.opsForValue().get(key);
-        return val != null;  // if key exists → token is blocked
+        String username = jwtService.parseUsername(token);
+        String jti = jwtService.extractJti(token);
+
+        if (jti == null || jti.isBlank()) {
+            return false;
+        }
+
+        String key = buildRedisKey(username, jti);
+        Boolean exists = redis.hasKey(key);
+        return Boolean.TRUE.equals(exists);
     }
 
-    private String buildRedisKey(String token) {
-        return "blocklist:" + token;
+    private String buildRedisKey(String username, String jti) {
+        String userPart = (username == null || username.isBlank())
+                ? "anonymous"
+                : username;
+        return "token:blocklist:" + userPart + ":" + jti;
     }
 }
