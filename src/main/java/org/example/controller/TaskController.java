@@ -50,6 +50,7 @@ public class TaskController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
+        // todo: add validations
         Pageable pageable = PageRequest.of(page, size);
         return taskService.listTasksForUser(user.getId(), pageable);
     }
