@@ -67,7 +67,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = authHeader.substring(7);
 
         // 1) Blocklist check for ALL tokens (access & refresh)
-        if (tokenBlocklistService.isBlocked(token)) {
+        boolean blocked = false;
+        try {
+            blocked = tokenBlocklistService.isBlocked(token);
+        } catch (Exception e) {
+            log.error("Failed to check token blocklist from Redis", e);
+            // 这里有两种策略：
+            // 1) 保守：当 Redis 出问题时，一律视为 blocked，拒绝请求（更安全）
+            // 2) 放宽：当 Redis 出问题时，当作不在 blocklist，允许请求（更可用）
+        }
+        if (blocked) {
             log.debug("Token is in blocklist");
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.getWriter().write("Token has been invalidated. Please log in again.");

@@ -3,6 +3,7 @@ package org.example.config;
 import org.example.auth.CustomUserPrincipal;
 import org.example.auth.JwtAuthenticationFilter;
 import org.example.repository.UserRepository;
+import org.example.service.UserLookupService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -15,7 +16,6 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -38,21 +38,21 @@ public class SecurityConfig {
 
     /** Bridge repository user to Spring Security's UserDetails. */
     @Bean
-    public UserDetailsService userDetailsService(UserRepository usersRepo) {
-        return username -> usersRepo.findByUsername(username)
-                .map(user -> {
-                    var authorities = List.of(
-                            new SimpleGrantedAuthority("ROLE_" + user.getRole().name())
-                    );
-                    return new CustomUserPrincipal(
-                            user.getId(),
-                            user.getUsername(),
-                            user.getPasswordHash(),
-                            authorities,
-                            user.isActive()
-                    );
-                })
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    public UserDetailsService userDetailsService(UserLookupService userLookupService) {
+        return username -> {
+            var user = userLookupService.getByUsernameOrThrow(username);
+
+            var authorities = List.of(
+                    new SimpleGrantedAuthority("ROLE_" + user.getRole().name())
+            );
+            return new CustomUserPrincipal(
+                    user.getId(),
+                    user.getUsername(),
+                    user.getPasswordHash(),
+                    authorities,
+                    user.isActive()
+            );
+        };
     }
 
     @Bean
