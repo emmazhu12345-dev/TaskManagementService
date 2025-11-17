@@ -1,9 +1,16 @@
+// src/main/java/org/example/controller/TaskController.java
 package org.example.controller;
 
 import org.example.auth.CustomUserPrincipal;
 import org.example.dto.CreateTaskRequest;
+import org.example.dto.PagedResponse;
 import org.example.dto.TaskResponse;
+import org.example.dto.UpdateTaskRequest;
+import org.example.dto.UpdateTaskStatusRequest;
+import org.example.model.AppUser;
 import org.example.service.TaskService;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,8 +18,6 @@ import java.util.List;
 
 /**
  * REST controller for Task-related endpoints.
- * Only createTask is fully implemented.
- * All other endpoints are skeletons with TODO placeholders.
  */
 @RestController
 @RequestMapping("/api/tasks")
@@ -25,7 +30,7 @@ public class TaskController {
     }
 
     // ======================================
-    // 1) Fully Implemented: Create a new Task
+    // Create a new Task
     // ======================================
     @PostMapping
     public TaskResponse createTask(
@@ -36,70 +41,68 @@ public class TaskController {
         return taskService.createTask(ownerId, request);
     }
 
-    // ===========================
-    // 2) Other endpoints (TODOs)
-    // ===========================
-
-    /**
-     * List all tasks belonging to the authenticated user.
-     */
+    // ======================================
+    // List all Tasks for current user
+    // ======================================
     @GetMapping
-    public List<TaskResponse> listTasks(
-            @AuthenticationPrincipal CustomUserPrincipal user
+    public PagedResponse<TaskResponse> listMyTasks(
+            @AuthenticationPrincipal CustomUserPrincipal user,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
     ) {
-        // TODO: call taskService.listTasks(ownerId)
-        throw new UnsupportedOperationException("TODO: implement listTasks endpoint");
+        // todo: add validations
+        Pageable pageable = PageRequest.of(page, size);
+        return taskService.listTasksForUser(user.getId(), pageable);
     }
 
-    /**
-     * Get a specific task by its ID.
-     */
+
+    // ======================================
+    // Get a single Task
+    // ======================================
     @GetMapping("/{id}")
     public TaskResponse getTask(
             @AuthenticationPrincipal CustomUserPrincipal user,
             @PathVariable long id
     ) {
-        // TODO: call taskService.getTask(ownerId, id)
-        throw new UnsupportedOperationException("TODO: implement getTask endpoint");
+        long ownerId = user.getId();
+        return taskService.getTask(ownerId, id);
     }
 
-    /**
-     * Update all editable fields of a task.
-     * Requires defining UpdateTaskRequest DTO.
-     */
+    // ======================================
+    // Update all editable fields of a Task
+    // ======================================
     @PutMapping("/{id}")
     public TaskResponse updateTask(
             @AuthenticationPrincipal CustomUserPrincipal user,
-            @PathVariable long id
-            // @RequestBody UpdateTaskRequest request
+            @PathVariable long id,
+            @RequestBody UpdateTaskRequest request
     ) {
-        // TODO: define UpdateTaskRequest and call taskService.updateTask(...)
-        throw new UnsupportedOperationException("TODO: implement updateTask endpoint");
+        long ownerId = user.getId();
+        return taskService.updateTask(ownerId, id, request);
     }
 
-    /**
-     * Update only the status of a task.
-     * Requires defining UpdateTaskStatusRequest DTO.
-     */
-    @PatchMapping("/{id}/status")
+    // ======================================
+    // Update only Task status
+    // ======================================
+    @PatchMapping("/status/{id}")
     public TaskResponse updateTaskStatus(
             @AuthenticationPrincipal CustomUserPrincipal user,
-            @PathVariable long id
-            // @RequestBody UpdateTaskStatusRequest request
+            @PathVariable long id,
+            @RequestBody UpdateTaskStatusRequest request
     ) {
-        // TODO: define UpdateTaskStatusRequest and call taskService.updateTaskStatus(...)
-        throw new UnsupportedOperationException("TODO: implement updateTaskStatus endpoint");
+        long ownerId = user.getId();
+        return taskService.updateTaskStatus(ownerId, id, request);
     }
 
-    /**
-     * Delete a task by its ID.
-     */
+    // ======================================
+    // Delete a Task
+    // ======================================
     @DeleteMapping("/{id}")
     public void deleteTask(
             @AuthenticationPrincipal CustomUserPrincipal user,
             @PathVariable long id
     ) {
-        // TODO: call taskService.deleteTask(ownerId, id)
-        throw new UnsupportedOperationException("TODO: implement deleteTask endpoint");
+        long ownerId = user.getId();
+        taskService.deleteTask(ownerId, id);
     }
 }
