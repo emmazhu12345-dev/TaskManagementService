@@ -38,6 +38,7 @@ public class UserLookupService {
     /**
      * Invalidate cache entry when user data is changed (password, role, active flag, etc.).
      */
+    // TODO: homework, update role , update user operaiton, should call this.
     public void evictByUsername(String username) {
         userByUsernameCache.invalidate(username);
     }
