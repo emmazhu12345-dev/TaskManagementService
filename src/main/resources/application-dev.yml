@@ -27,6 +27,31 @@ spring:
     redis:
       time-to-live: 600000 # 10 分钟，按需要改
 
+  # 👉 Kafka dev
+  kafka:
+    bootstrap-servers: localhost:9092   # 对应 docker-compose 里的 9092:9092
+
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        # 你如果不需要 type headers，可以设为 false；保持简单先不加别的
+        spring.json.add.type.headers: false
+
+    consumer:
+      # 这里配置一个默认 group-id；具体的 @KafkaListener 可以自己 override
+      group-id: tms-dev-default-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "org.example.kafka.event"
+        # Dev 环境常用 earliest，方便本地重跑看到历史消息
+        spring.json.use.type.headers: false
+      auto-offset-reset: earliest
+
+    listener:
+      # 简单起见先用 record 级别 ack
+      ack-mode: record
 
 server:
   port: 8080
