@@ -6,12 +6,12 @@ import org.example.dto.PagedResponse;
 import org.example.dto.TaskResponse;
 import org.example.dto.UpdateTaskRequest;
 import org.example.dto.UpdateTaskStatusRequest;
+import org.example.kafka.event.TaskRemovalReason;
+import org.example.kafka.producer.TaskEventProducer;
 import org.example.model.Task;
 import org.example.model.TaskStatus;
 import org.example.repository.TaskRepository;
 import org.example.utils.TaskMapper;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,10 +25,12 @@ import java.util.List;
 @Service
 public class TaskService {
 
-    private final TaskRepository taskRepository;  // Or TaskRepositoryImpl
+    private final TaskRepository taskRepository;
+    private final TaskEventProducer taskEventProducer;
 
-    public TaskService(TaskRepository taskRepository) {
+    public TaskService(TaskRepository taskRepository, TaskEventProducer taskEventProducer) {
         this.taskRepository = taskRepository;
+        this.taskEventProducer = taskEventProducer;
     }
 
     // ===================================================
@@ -49,7 +51,11 @@ public class TaskService {
         task.setUpdatedAt(now);
 
         Task saved = taskRepository.createTask(task);
-        return toResponse(saved);
+
+        // Publish "task created" event
+        taskEventProducer.publishTaskCreated(saved);
+
+        return TaskMapper.toResponse(saved);
     }
 
     // ===================================================
@@ -80,7 +86,7 @@ public class TaskService {
     public TaskResponse getTask(long ownerId, long taskId) {
         Task task = taskRepository.findTaskByIdAndOwner(taskId, ownerId)
                 .orElseThrow(() -> new IllegalArgumentException("Task not found"));
-        return toResponse(task);
+        return TaskMapper.toResponse(task);
     }
 
     // ===================================================
@@ -102,7 +108,11 @@ public class TaskService {
         if (!updated) {
             throw new IllegalStateException("Failed to update task");
         }
-        return toResponse(task);
+
+        // use the updated Task entity to publish event
+        taskEventProducer.publishTaskUpdated(task);
+
+        return TaskMapper.toResponse(task);
     }
 
     // ===================================================
@@ -120,33 +130,34 @@ public class TaskService {
         if (!updated) {
             throw new IllegalStateException("Failed to update task status");
         }
-        return toResponse(task);
+
+        // ---------------------------------------------------
+        // Publish Kafka events based on the new task status
+        // ---------------------------------------------------
+        switch (request.status()) {
+            case COMPLETED -> taskEventProducer.publishTaskCompleted(task);
+            case CANCELLED -> taskEventProducer.publishTaskRemoved(task, TaskRemovalReason.CANCELED);
+            default -> taskEventProducer.publishTaskUpdated(task);
+        }
+
+        return TaskMapper.toResponse(task);
     }
+
 
     // ===================================================
     // Delete a task
     // ===================================================
     @Transactional
     public void deleteTask(long ownerId, long taskId) {
+        // Fetch the task first so we can publish a meaningful event
+        Task task = taskRepository.findTaskByIdAndOwner(taskId, ownerId)
+                .orElseThrow(() -> new IllegalArgumentException("Task not found"));
+
         boolean deleted = taskRepository.deleteTask(taskId, ownerId);
         if (!deleted) {
             throw new IllegalArgumentException("Task not found");
         }
-    }
-
-    // ===================================================
-    // Utility: Entity -> DTO
-    // ===================================================
-    private TaskResponse toResponse(Task task) {
-        return new TaskResponse(
-                task.getId(),
-                task.getTitle(),
-                task.getDescription(),
-                task.getStatus(),
-                task.getPriority(),
-                task.getDueDate(),
-                task.getCreatedAt(),
-                task.getUpdatedAt()
-        );
+        // Publish a unified removal event (delete = hard removal)
+        taskEventProducer.publishTaskRemoved(task, TaskRemovalReason.DELETED);
     }
 }

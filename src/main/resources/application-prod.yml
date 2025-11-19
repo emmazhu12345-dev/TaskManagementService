@@ -34,6 +34,31 @@ spring:
     redis:
       time-to-live: 600000
 
+  # Kafka prod
+  kafka:
+    bootstrap-servers: localhost:9092
+    # real prod env
+#    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
+
+    consumer:
+      # prod 下你也可以不给默认 group-id，让每个 @KafkaListener 自己指定
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "org.example.kafka.event"
+        spring.json.use.type.headers: false
+      # prod 一般用 latest；你可以按需要改，这里先不设就用默认
+      # auto-offset-reset: latest
+
+    listener:
+      ack-mode: record
+
 server:
   port: 8080
 
