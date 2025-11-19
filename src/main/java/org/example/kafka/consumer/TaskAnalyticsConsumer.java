@@ -1,4 +1,4 @@
-package org.example.kafka.consumer.analytics;
+package org.example.kafka.consumer;
 
 public class TaskAnalyticsConsumer {
 }
