@@ -31,7 +31,7 @@ public class AiTaskService {
     }
 
     // -----------------------
-    // Option A: Daily Summary
+    // Function A: Daily Summary
     // -----------------------
     public String generateDailySummary(AppUser user, TaskDailyStats stats) {
         String prompt = buildDailySummaryPrompt(user, stats);
@@ -45,7 +45,7 @@ public class AiTaskService {
     }
 
     // -----------------------
-    // Option B: Overdue Risk
+    // Function B: Overdue Risk
     // -----------------------
     public double predictOverdueRisk(AppUser user, Task task) {
         String prompt = buildOverdueRiskPrompt(user, task);
@@ -65,7 +65,7 @@ public class AiTaskService {
     }
 
     // -----------------------
-    // Option C: Re-ranking
+    // Function C: Re-ranking
     // -----------------------
     public List<Task> rerankTasks(AppUser user, List<Task> tasks) {
         if (tasks.isEmpty()) {
@@ -99,7 +99,7 @@ public class AiTaskService {
     }
 
     // -----------------------
-    // Option D: Pattern Mining
+    // Function D: Pattern Mining
     // -----------------------
     public List<WorkPatternInsight> analyzePatterns(AppUser user, List<TaskDailyStats> history) {
         if (history.isEmpty()) {
@@ -142,7 +142,7 @@ public class AiTaskService {
     // Prompt Builders (English)
     // -----------------------
 
-    // Option A
+    // Function A
     private String buildDailySummaryPrompt(AppUser user, TaskDailyStats stats) {
         return """
             You are a productivity assistant for a task management system.
@@ -178,7 +178,7 @@ public class AiTaskService {
                     stats.getRemovedCanceledCount());
     }
 
-    // Option B
+    // Function B
     private String buildOverdueRiskPrompt(AppUser user, Task task) {
         return """
             You are an assistant that predicts overdue risk.
@@ -213,7 +213,7 @@ public class AiTaskService {
                     task.getDueDate() != null ? DateTimeFormatter.ISO_INSTANT.format(task.getDueDate()) : "none");
     }
 
-    // Option C
+    // Function C
     private String buildRerankPrompt(AppUser user, List<Task> tasks) {
         StringBuilder sb = new StringBuilder();
 
@@ -263,7 +263,7 @@ public class AiTaskService {
         return sb.toString();
     }
 
-    // Option D
+    // Function D
     private String buildPatternPrompt(AppUser user, String statsJson) {
         return """
             You are an AI assistant that analyzes long-term productivity patterns.

@@ -63,11 +63,15 @@ public class AnalyticsService {
      */
     @Async
     public void recordDailyStatsAndGenerateSummary(TaskEvent event) {
+        log.info("start to recordDailyStatsAndGenerateSummary");
         // Record the task completion in daily stats
         recordTaskCompleted();
 
+        log.info("start to generateAiSummaryAsync");
         // Asynchronously generate AI summary (non-blocking)
         generateAiSummaryAsync(event);
+
+        log.info("Done to generateAiSummaryAsync");
     }
 
     /**

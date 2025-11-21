@@ -10,7 +10,16 @@ public class OpenAIConfig {
 
     @Bean
     public OpenAIClient openAIClient() {
-        // Configures using OPENAI_API_KEY / OPENAI_ORG_ID / OPENAI_PROJECT_ID environment variables
-        return OpenAIOkHttpClient.fromEnv();
+        // Read API key from environment explicitly
+        String apiKey = System.getenv("OPENAI_API_KEY");
+
+        if (apiKey == null || apiKey.isBlank()) {
+            throw new IllegalStateException("OPENAI_API_KEY is not set in environment variables");
+        }
+
+        // You can also set organization or project here if needed.
+        return OpenAIOkHttpClient.builder()
+                .apiKey(apiKey)
+                .build();
     }
 }
