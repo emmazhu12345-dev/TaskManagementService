@@ -52,6 +52,11 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
+    public Optional<AppUser> findById(Long id) {
+        return jdbi.withExtension(AppUserDao.class, dao -> dao.findById(id));
+    }
+
+    @Override
     public void setRole(Long userId, Role role) {
         int n = jdbi.withExtension(AppUserDao.class, dao -> dao.updateRole(userId, role.name()));
         if (n == 0) throw new IllegalArgumentException("User not found");

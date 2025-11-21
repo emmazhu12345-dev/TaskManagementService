@@ -1,6 +1,7 @@
 package org.example.repository.impl;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import org.example.dao.AnalyticsDao;
 import org.example.kafka.event.TaskRemovalReason;

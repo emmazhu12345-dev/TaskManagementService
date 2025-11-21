@@ -41,6 +41,15 @@ public interface AppUserDao {
     @SqlQuery("SELECT id FROM app_user WHERE username = :username")
     Optional<Long> findIdByUsername(@Bind("username") String username);
 
+    @SqlQuery(
+            """
+            SELECT id, username, email, password_hash, first_name, last_name, role,
+                   is_active AS active, created_at, updated_at
+              FROM app_user
+             WHERE id = :id
+            """)
+    Optional<AppUser> findById(@Bind("id") Long id);
+
     @SqlUpdate("UPDATE app_user SET role=:role WHERE id=:id")
     int updateRole(@Bind("id") Long id, @Bind("role") String role);
 

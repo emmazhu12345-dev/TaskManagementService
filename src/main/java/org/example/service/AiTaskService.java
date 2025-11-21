@@ -145,97 +145,96 @@ public class AiTaskService {
     // Option A
     private String buildDailySummaryPrompt(AppUser user, TaskDailyStats stats) {
         return """
-                          You are a productivity assistant for a task management system.
-
-                          Write a concise 1–2 sentence English summary describing the user's productivity today,
-                          based on the provided daily statistics. Mention:
-                          - how many tasks were created,
-                          - how many were completed,
-                          - how many were removed (including deleted/canceled),
-                          - a brief comment on workload balance,
-                          - and give one concrete suggestion for tomorrow.
-
-                          Output plain English text only.
-
-                          User:
-                          - username: %s
-
-                          Daily Stats:
-                          - date: %s
-                          - created_count: %d
-                          - completed_count: %d
-                          - removed_total_count: %d
-                          - removed_deleted_count: %d
-                          - removed_canceled_count: %d
-                          """
+            You are a productivity assistant for a task management system.
+            
+            Write a concise 1–2 sentence English summary describing the user's productivity today,
+            based on the provided daily statistics. Mention:
+            - how many tasks were created,
+            - how many were completed,
+            - how many were removed (including deleted/canceled),
+            - a brief comment on workload balance,
+            - and give one concrete suggestion for tomorrow.
+            
+            Output plain English text only.
+            
+            User:
+            - username: %s
+            
+            Daily Stats:
+            - date: %s
+            - created_count: %d
+            - completed_count: %d
+            - removed_total_count: %d
+            - removed_deleted_count: %d
+            - removed_canceled_count: %d
+            """
                 .formatted(
-                        safe(user.getUsername()),
-                        stats.getStatDate(),
-                        stats.getCreatedCount(),
-                        stats.getCompletedCount(),
-                        stats.getRemovedTotalCount(),
-                        stats.getRemovedDeletedCount(),
-                        stats.getRemovedCanceledCount());
+                    safe(user.getUsername()),
+                    stats.getStatDate(),
+                    stats.getCreatedCount(),
+                    stats.getCompletedCount(),
+                    stats.getRemovedTotalCount(),
+                    stats.getRemovedDeletedCount(),
+                    stats.getRemovedCanceledCount());
     }
 
     // Option B
     private String buildOverdueRiskPrompt(AppUser user, Task task) {
         return """
-                              You are an assistant that predicts overdue risk.
-
-                              Based on the task information below, return ONLY a number between 0.0 and 1.0
-                              representing the probability that this task will become overdue.
-
-                              Output ONLY the number. No explanation.
-
-                              User:
-                              - username: %s
-
-                              Task:
-                              - id: %d
-                              - title: %s
-                              - description: %s
-                              - priority: %s
-                              - status: %s
-                              - created_at: %s
-                              - due_date: %s
-                              """
+            You are an assistant that predicts overdue risk.
+            
+            Based on the task information below, return ONLY a number between 0.0 and 1.0
+            representing the probability that this task will become overdue.
+            
+            Output ONLY the number. No explanation.
+            
+            User:
+            - username: %s
+            
+            Task:
+            - id: %d
+            - title: %s
+            - description: %s
+            - priority: %s
+            - status: %s
+            - created_at: %s
+            - due_date: %s
+            """
                 .formatted(
-                        safe(user.getUsername()),
-                        task.getId(),
-                        safe(task.getTitle()),
-                        safe(task.getDescription()),
-                        String.valueOf(task.getPriority()),
-                        String.valueOf(task.getStatus()),
-                        task.getCreatedAt() != null
-                                ? DateTimeFormatter.ISO_INSTANT.format(task.getCreatedAt())
-                                : "unknown",
-                        task.getDueDate() != null ? DateTimeFormatter.ISO_INSTANT.format(task.getDueDate()) : "none");
+                    safe(user.getUsername()),
+                    task.getId(),
+                    safe(task.getTitle()),
+                    safe(task.getDescription()),
+                    String.valueOf(task.getPriority()),
+                    String.valueOf(task.getStatus()),
+                    task.getCreatedAt() != null
+                            ? DateTimeFormatter.ISO_INSTANT.format(task.getCreatedAt())
+                            : "unknown",
+                    task.getDueDate() != null ? DateTimeFormatter.ISO_INSTANT.format(task.getDueDate()) : "none");
     }
 
     // Option C
     private String buildRerankPrompt(AppUser user, List<Task> tasks) {
         StringBuilder sb = new StringBuilder();
 
-        sb.append(
-                """
-                          You are an AI assistant that re-ranks tasks for a user.
-
-                          Given the task list below, reorder them in the recommended priority for tomorrow.
-                          Consider:
-                          - priority level
-                          - urgency (based on dueDate)
-                          - task status
-                          - title and description for contextual hints
-                          - task age (createdAt)
-                          - reasonable productivity patterns (e.g., do short tasks first, big tasks later)
-
-                          Output ONLY a comma-separated list of task IDs in the new order.
-                          Do NOT output any explanation or additional text.
-                          Example: 3,5,1,2
-
-                          User:
-                          """);
+        sb.append("""
+            You are an AI assistant that re-ranks tasks for a user.
+            
+            Given the task list below, reorder them in the recommended priority for tomorrow.
+            Consider:
+            - priority level
+            - urgency (based on dueDate)
+            - task status
+            - title and description for contextual hints
+            - task age (createdAt)
+            - reasonable productivity patterns (e.g., do short tasks first, big tasks later)
+            
+            Output ONLY a comma-separated list of task IDs in the new order.
+            Do NOT output any explanation or additional text.
+            Example: 3,5,1,2
+            
+            User:
+            """);
 
         sb.append("- username: ").append(safe(user.getUsername())).append("\n\n");
 
@@ -244,20 +243,20 @@ public class AiTaskService {
         // Add each task in a consistent LLM-friendly format
         for (Task t : tasks) {
             sb.append("ID=")
-                    .append(t.getId())
-                    .append(", title=")
-                    .append(safe(t.getTitle()))
-                    .append(", description=")
-                    .append(safe(t.getDescription()))
-                    .append(", priority=")
-                    .append(t.getPriority())
-                    .append(", status=")
-                    .append(t.getStatus())
-                    .append(", dueDate=")
-                    .append(t.getDueDate() != null ? DateTimeFormatter.ISO_INSTANT.format(t.getDueDate()) : "null")
-                    .append(", createdAt=")
-                    .append(t.getCreatedAt() != null ? DateTimeFormatter.ISO_INSTANT.format(t.getCreatedAt()) : "null")
-                    .append("\n");
+                .append(t.getId())
+                .append(", title=")
+                .append(safe(t.getTitle()))
+                .append(", description=")
+                .append(safe(t.getDescription()))
+                .append(", priority=")
+                .append(t.getPriority())
+                .append(", status=")
+                .append(t.getStatus())
+                .append(", dueDate=")
+                .append(t.getDueDate() != null ? DateTimeFormatter.ISO_INSTANT.format(t.getDueDate()) : "null")
+                .append(", createdAt=")
+                .append(t.getCreatedAt() != null ? DateTimeFormatter.ISO_INSTANT.format(t.getCreatedAt()) : "null")
+                .append("\n");
         }
 
         sb.append("\nReturn only the ID list.");
@@ -267,21 +266,21 @@ public class AiTaskService {
     // Option D
     private String buildPatternPrompt(AppUser user, String statsJson) {
         return """
-                              You are an AI assistant that analyzes long-term productivity patterns.
-
-                              You will receive a JSON list of daily task statistics.
-                              Identify 2–5 meaningful patterns about the user's work behavior,
-                              such as weekday trends, morning/afternoon efficiency differences, or backlog tendencies.
-
-                              Output multiple bullet points in English, plus a final 1–2 sentence overall recommendation.
-                              Do NOT output JSON.
-
-                              User:
-                              - username: %s
-
-                              Daily Stats JSON:
-                              %s
-                              """
+            You are an AI assistant that analyzes long-term productivity patterns.
+            
+            You will receive a JSON list of daily task statistics.
+            Identify 2–5 meaningful patterns about the user's work behavior,
+            such as weekday trends, morning/afternoon efficiency differences, or backlog tendencies.
+            
+            Output multiple bullet points in English, plus a final 1–2 sentence overall recommendation.
+            Do NOT output JSON.
+            
+            User:
+            - username: %s
+            
+            Daily Stats JSON:
+            %s
+            """
                 .formatted(safe(user.getUsername()), statsJson);
     }
 

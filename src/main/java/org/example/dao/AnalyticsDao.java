@@ -1,6 +1,7 @@
 package org.example.dao;
 
 import java.time.LocalDate;
+import java.util.List;
 import org.example.model.TaskDailyStats;
 import org.jdbi.v3.sqlobject.config.RegisterBeanMapper;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;

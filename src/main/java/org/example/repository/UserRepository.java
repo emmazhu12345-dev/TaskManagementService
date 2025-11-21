@@ -18,6 +18,8 @@ public interface UserRepository {
 
     Optional<Long> findIdByUsername(String username);
 
+    Optional<AppUser> findById(Long id);
+
     void setRole(Long userId, Role role);
 
     void setActive(Long userId, boolean active);

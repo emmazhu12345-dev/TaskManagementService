@@ -1,7 +1,6 @@
 package org.example.auth;
 
 import java.util.Collection;
-
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 public class CustomUserPrincipal implements UserDetails {
     @Getter
     private final Long id;
+
     private final String username;
     private final String password;
     private final Collection<? extends GrantedAuthority> authorities;
