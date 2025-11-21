@@ -1,5 +1,6 @@
 package org.example.controller;
 
+import java.util.List;
 import org.example.model.AppUser;
 import org.example.model.Note;
 import org.example.model.Role;
@@ -15,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -31,11 +31,14 @@ public class AdminController {
     }
 
     public record UpdateRoleRequest(Role role, Long id) {}
+
     public record UpdateActiveRequest(boolean active) {}
 
     // Only Admin role can read all users
     @GetMapping("/users")
-    public List<AppUser> users() { return userService.getAllUsers(); }
+    public List<AppUser> users() {
+        return userService.getAllUsers();
+    }
 
     @PostMapping("/users/role")
     public void setRole(@RequestBody UpdateRoleRequest req) {
@@ -51,9 +54,7 @@ public class AdminController {
     }
 
     @GetMapping("/notes")
-    public Page<Note> listAll(@RequestParam(defaultValue="0") int page,
-                              @RequestParam(defaultValue="10") int size) {
+    public Page<Note> listAll(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
         return noteService.listNotes(PageRequest.of(page, size));
     }
 }
-

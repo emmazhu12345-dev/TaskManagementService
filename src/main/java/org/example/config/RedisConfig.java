@@ -1,10 +1,9 @@
 package org.example.config;
 
-import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 @Configuration
@@ -20,15 +19,15 @@ public class RedisConfig {
         return new LettuceConnectionFactory();
     }
 
-//    @Bean
-//    public LettuceConnectionFactory redisConnectionFactory(
-//            RedisProperties redisProperties
-//    ) {
-//        return new LettuceConnectionFactory(
-//                redisProperties.getHost(),
-//                redisProperties.getPort()
-//        );
-//    }
+    //    @Bean
+    //    public LettuceConnectionFactory redisConnectionFactory(
+    //            RedisProperties redisProperties
+    //    ) {
+    //        return new LettuceConnectionFactory(
+    //                redisProperties.getHost(),
+    //                redisProperties.getPort()
+    //        );
+    //    }
 
     @Bean
     public StringRedisTemplate stringRedisTemplate(RedisConnectionFactory factory) {

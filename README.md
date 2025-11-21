@@ -162,3 +162,12 @@ docker logs tms-postgres
 ### Enter PostgreSQL container shell
 docker exec -it tms-postgres bash
 psql -U tmsuser -d tmsdb
+
+### export to the enviroment
+```
+export OPENAI_API_KEY=sk-xxxx
+
+if needed:
+# export OPENAI_ORG_ID=...
+# export OPENAI_PROJECT_ID=..
+```

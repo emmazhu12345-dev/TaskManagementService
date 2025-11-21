@@ -1,14 +1,13 @@
 package org.example.repository.impl;
 
+import java.util.List;
+import java.util.Optional;
 import org.example.dao.AppUserDao;
 import org.example.model.AppUser;
 import org.example.model.Role;
 import org.example.repository.UserRepository;
 import org.jdbi.v3.core.Jdbi;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
-import java.util.Optional;
 
 @Repository
 public class UserRepositoryImpl implements UserRepository {

@@ -1,5 +1,10 @@
 package org.example.service;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import java.util.List;
+import java.util.Optional;
 import org.example.model.AppUser;
 import org.example.model.Note;
 import org.example.repository.NoteRepository;
@@ -13,16 +18,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
-import java.util.List;
-import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-/**
- * Unit tests for NoteService.
- * All test names and comments are in English as requested.
- */
+/** Unit tests for NoteService. All test names and comments are in English as requested. */
 @ExtendWith(MockitoExtension.class)
 class NoteServiceTest {
 
@@ -59,10 +56,7 @@ class NoteServiceTest {
     void listMyNotes_shouldReturnNotesForOwner() {
         // Arrange
         Pageable pageable = PageRequest.of(0, 2, Sort.by("id").descending());
-        List<Note> data = List.of(
-                newNote("A", "a", owner),
-                newNote("B", "b", owner)
-        );
+        List<Note> data = List.of(newNote("A", "a", owner), newNote("B", "b", owner));
         Page<Note> page = new PageImpl<>(data, pageable, 5);
 
         when(userRepository.findByUsername("emma")).thenReturn(Optional.of(owner));

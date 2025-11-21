@@ -132,6 +132,18 @@
             <artifactId>jackson-datatype-jsr310</artifactId>
         </dependency>
 
+        <!-- OpenAI Java SDK -->
+        <dependency>
+            <groupId>com.openai</groupId>
+            <artifactId>openai-java</artifactId>
+            <version>4.8.0</version>
+        </dependency>
+
+        <!-- Jackson (if not already in your project) -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
 
         <!-- Testing -->
         <dependency>
@@ -221,7 +233,14 @@
                 <version>2.43.0</version>
                 <configuration>
                     <java>
-                        <googleJavaFormat/>
+                        <palantirJavaFormat>
+                            <version>2.38.0</version>
+                            <style>PALANTIR</style>
+                        </palantirJavaFormat>
+                        <indent>
+                            <spaces>true</spaces>
+                            <spacesPerTab>4</spacesPerTab>
+                        </indent>
                         <importOrder/>
                     </java>
                 </configuration>

@@ -1,14 +1,13 @@
 package org.example.service;
 
+import java.time.LocalDate;
+import java.util.Optional;
 import org.example.dto.TaskDailyStatsResponse;
 import org.example.kafka.event.TaskRemovalReason;
 import org.example.model.TaskDailyStats;
 import org.example.repository.AnalyticsRepository;
 import org.example.utils.TaskDailyStatsMapper;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDate;
-import java.util.Optional;
 
 @Service
 public class AnalyticsService {
@@ -32,10 +31,18 @@ public class AnalyticsService {
     }
 
     public TaskDailyStatsResponse getDailyStatsResponse(LocalDate date) {
-        TaskDailyStats stats = repository.findDailyStats(date)
+        TaskDailyStats stats = repository
+                .findDailyStats(date)
                 .orElseThrow(() -> new IllegalArgumentException("No stats found for date: " + date));
 
         return TaskDailyStatsMapper.toResponse(stats);
     }
 
+    public Optional<TaskDailyStats> getDailyStats(LocalDate date) {
+        return repository.findDailyStats(date);
+    }
+
+    public java.util.List<TaskDailyStats> getStatsByDateRange(LocalDate startDate, LocalDate endDate) {
+        return repository.findStatsByDateRange(startDate, endDate);
+    }
 }

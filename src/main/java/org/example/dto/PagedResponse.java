@@ -9,5 +9,4 @@ public record PagedResponse<T>(
         long totalElements,
         int totalPages,
         boolean hasNext,
-        boolean hasPrevious
-) {}
+        boolean hasPrevious) {}

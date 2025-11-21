@@ -1,10 +1,9 @@
 package org.example.model;
 
+import java.time.Instant;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.time.Instant;
 
 @Getter
 @Setter
@@ -17,7 +16,7 @@ public class Task {
     private String title;
     private String description;
 
-    private TaskStatus status;     // enum
+    private TaskStatus status; // enum
     private TaskPriority priority; // enum
 
     private Instant dueDate;

@@ -1,11 +1,10 @@
 package org.example.service;
 
+import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import org.example.auth.JwtService;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
-
-import java.time.Duration;
 
 @Service
 @RequiredArgsConstructor
@@ -30,11 +29,7 @@ public class TokenBlocklistService {
 
         String key = buildRedisKey(username, jti);
 
-        redis.opsForValue().set(
-                key,
-                String.valueOf(expiresAtMillis),
-                Duration.ofMillis(ttlMillis)
-        );
+        redis.opsForValue().set(key, String.valueOf(expiresAtMillis), Duration.ofMillis(ttlMillis));
     }
 
     public boolean isBlocked(String token) {
@@ -51,9 +46,7 @@ public class TokenBlocklistService {
     }
 
     private String buildRedisKey(String username, String jti) {
-        String userPart = (username == null || username.isBlank())
-                ? "anonymous"
-                : username;
+        String userPart = (username == null || username.isBlank()) ? "anonymous" : username;
         return "token:blocklist:" + userPart + ":" + jti;
     }
 }

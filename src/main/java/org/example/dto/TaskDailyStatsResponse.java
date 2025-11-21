@@ -3,9 +3,7 @@ package org.example.dto;
 import java.time.Instant;
 import java.time.LocalDate;
 
-/**
- * DTO used by the REST API to return daily task statistics.
- */
+/** DTO used by the REST API to return daily task statistics. */
 public record TaskDailyStatsResponse(
         LocalDate statDate,
         long createdCount,
@@ -14,6 +12,4 @@ public record TaskDailyStatsResponse(
         long removedDeletedCount,
         long removedCanceledCount,
         Instant createdAt,
-        Instant updatedAt
-) {
-}
+        Instant updatedAt) {}

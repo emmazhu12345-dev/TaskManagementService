@@ -11,8 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * NoteService handles all business logic for notes.
- * Controller should never directly call repository.
+ * NoteService handles all business logic for notes. Controller should never directly call
+ * repository.
  */
 @Service
 public class NoteService {
@@ -32,7 +32,8 @@ public class NoteService {
 
     /** List all notes for the authenticated user. */
     public Page<Note> listMyNotes(String username, Pageable pageable) {
-        AppUser owner = userLookupService.findByUsernameCached(username)
+        AppUser owner = userLookupService
+                .findByUsernameCached(username)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         return notesRepo.findByOwnerId(owner.getId(), pageable);
@@ -41,7 +42,8 @@ public class NoteService {
     /** Create a note (with ownership binding). */
     @Transactional
     public Note create(String username, String title, String content) {
-        AppUser owner = userLookupService.findByUsernameCached(username)
+        AppUser owner = userLookupService
+                .findByUsernameCached(username)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         Note note = new Note(title, content, owner.getId());
@@ -50,20 +52,24 @@ public class NoteService {
 
     /** Retrieve one note, ensuring ownership validation. */
     public Note getOne(String username, Long id) {
-        AppUser owner = userLookupService.findByUsernameCached(username)
+        AppUser owner = userLookupService
+                .findByUsernameCached(username)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        return notesRepo.findByIdAndOwnerId(id, owner.getId())
+        return notesRepo
+                .findByIdAndOwnerId(id, owner.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Note not found"));
     }
 
     /** Update a note, ensuring user owns it. */
     @Transactional
     public Note update(String username, Long id, String title, String content) {
-        AppUser owner = userLookupService.findByUsernameCached(username)
+        AppUser owner = userLookupService
+                .findByUsernameCached(username)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        Note note = notesRepo.findByIdAndOwnerId(id, owner.getId())
+        Note note = notesRepo
+                .findByIdAndOwnerId(id, owner.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Note not found"));
 
         note.setTitle(title);
@@ -74,10 +80,12 @@ public class NoteService {
     /** Delete a note, ensuring user owns it. */
     @Transactional
     public void delete(String username, Long id) {
-        AppUser owner = userLookupService.findByUsernameCached(username)
+        AppUser owner = userLookupService
+                .findByUsernameCached(username)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        Note note = notesRepo.findByIdAndOwnerId(id, owner.getId())
+        Note note = notesRepo
+                .findByIdAndOwnerId(id, owner.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Note not found"));
 
         notesRepo.delete(note);

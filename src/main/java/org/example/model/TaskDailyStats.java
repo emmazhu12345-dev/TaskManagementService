@@ -1,19 +1,18 @@
 package org.example.model;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.jdbi.v3.core.mapper.reflect.ColumnName;
 
-import java.time.Instant;
-import java.time.LocalDate;
-
 @Getter
 @Setter
+@Data
 @NoArgsConstructor
-/**
- * Domain model representing daily aggregated task statistics.
- */
+/** Domain model representing daily aggregated task statistics. */
 public class TaskDailyStats {
 
     @ColumnName("stat_date")

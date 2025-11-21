@@ -1,10 +1,11 @@
 package org.example.auth;
 
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
+import java.io.IOException;
 import org.example.service.TokenBlocklistService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,14 +16,9 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import io.jsonwebtoken.JwtException;
-
-import java.io.IOException;
-
 /**
- * Validates Bearer tokens and sets SecurityContext.
- * - Access tokens: used to authenticate and set SecurityContext
- * - Refresh tokens: allowed ONLY for /api/auth/refresh, never used to authenticate
+ * Validates Bearer tokens and sets SecurityContext. - Access tokens: used to authenticate and set
+ * SecurityContext - Refresh tokens: allowed ONLY for /api/auth/refresh, never used to authenticate
  * Continues the chain regardless of token status (except explicit 401 cases).
  */
 @Component
@@ -35,19 +31,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final TokenBlocklistService tokenBlocklistService;
 
     public JwtAuthenticationFilter(
-            JwtService jwtService,
-            UserDetailsService userDetailsService,
-            TokenBlocklistService tokenBlocklistService
-    ) {
+            JwtService jwtService, UserDetailsService userDetailsService, TokenBlocklistService tokenBlocklistService) {
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
         this.tokenBlocklistService = tokenBlocklistService;
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
 
         String path = request.getRequestURI();
         log.debug("JWT filter path={}", path);
@@ -120,8 +112,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 // Optional：Can check if the token is expired, reject the request fast
                 // if (jwtService.isTokenExpired(token)) { ... }
 
-                var authentication = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
+                var authentication =
+                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 

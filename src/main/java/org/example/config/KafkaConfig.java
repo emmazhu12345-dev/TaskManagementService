@@ -1,5 +1,7 @@
 package org.example.config;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -14,13 +16,9 @@ import org.springframework.kafka.core.*;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
- * Kafka configuration for producing and consuming TaskEvent messages.
- * Uses JsonSerializer / JsonDeserializer for serialization.
- * Bootstrap servers are injected from application-*.yml.
+ * Kafka configuration for producing and consuming TaskEvent messages. Uses JsonSerializer /
+ * JsonDeserializer for serialization. Bootstrap servers are injected from application-*.yml.
  */
 @Configuration
 @EnableKafka
@@ -47,8 +45,8 @@ public class KafkaConfig {
     }
 
     /**
-     * the Spring Boot Kafka Producer client.
-     * It is the object we use to publish TaskEvent messages to Kafka topics.
+     * the Spring Boot Kafka Producer client. It is the object we use to publish TaskEvent messages to
+     * Kafka topics.
      */
     @Bean
     public KafkaTemplate<String, TaskEvent> taskEventKafkaTemplate() {
@@ -60,8 +58,7 @@ public class KafkaConfig {
     // =======================================================
     @Bean
     public ConsumerFactory<String, TaskEvent> taskEventConsumerFactory(
-            @Value("${spring.kafka.consumer.group-id:tms-default-group}") String groupId
-    ) {
+            @Value("${spring.kafka.consumer.group-id:tms-default-group}") String groupId) {
         JsonDeserializer<TaskEvent> jsonDeserializer = new JsonDeserializer<>(TaskEvent.class);
         jsonDeserializer.addTrustedPackages("org.example.kafka.event");
 
@@ -72,11 +69,7 @@ public class KafkaConfig {
         props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
-        return new DefaultKafkaConsumerFactory<>(
-                props,
-                new StringDeserializer(),
-                jsonDeserializer
-        );
+        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), jsonDeserializer);
     }
 
     /**
@@ -85,8 +78,7 @@ public class KafkaConfig {
      */
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, TaskEvent> taskEventListenerFactory(
-            ConsumerFactory<String, TaskEvent> taskEventConsumerFactory
-    ) {
+            ConsumerFactory<String, TaskEvent> taskEventConsumerFactory) {
         ConcurrentKafkaListenerContainerFactory<String, TaskEvent> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
 

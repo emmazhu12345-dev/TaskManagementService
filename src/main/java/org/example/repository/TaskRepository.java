@@ -1,16 +1,12 @@
 package org.example.repository;
 
-import org.example.dto.PagedResponse;
-import org.example.model.Task;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-
 import java.util.List;
 import java.util.Optional;
+import org.example.dto.PagedResponse;
+import org.example.model.Task;
+import org.springframework.data.domain.Pageable;
 
-/**
- * Repository abstraction on top of TaskDao.
- */
+/** Repository abstraction on top of TaskDao. */
 public interface TaskRepository {
 
     Task createTask(Task task);
@@ -22,4 +18,8 @@ public interface TaskRepository {
     boolean updateTask(Task task);
 
     boolean deleteTask(long taskId, long ownerId);
+
+    List<Task> findTasksForTomorrow(long ownerId, java.time.Instant tomorrowEnd);
+
+    List<Task> findOpenTasksByOwner(long ownerId);
 }

@@ -1,14 +1,14 @@
 package org.example.repository;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 import org.example.kafka.event.TaskRemovalReason;
 import org.example.model.TaskDailyStats;
 
-import java.time.LocalDate;
-import java.util.Optional;
-
 /**
- * Repository for writing aggregated analytics data.
- * This layer defines business-level persistence operations.
+ * Repository for writing aggregated analytics data. This layer defines business-level persistence
+ * operations.
  */
 public interface AnalyticsRepository {
 
@@ -19,4 +19,6 @@ public interface AnalyticsRepository {
     void incrementDailyRemovedCount(LocalDate date, TaskRemovalReason reason);
 
     Optional<TaskDailyStats> findDailyStats(LocalDate date);
+
+    List<TaskDailyStats> findStatsByDateRange(LocalDate startDate, LocalDate endDate);
 }

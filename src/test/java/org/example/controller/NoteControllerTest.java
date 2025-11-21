@@ -1,6 +1,20 @@
 package org.example.controller;
 
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.MockitoAnnotations.openMocks;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
 import org.example.model.AppUser;
 import org.example.model.Note;
 import org.example.service.NoteService;
@@ -24,24 +38,11 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.server.ResponseStatusException;
-import java.util.List;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.openMocks;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
- * Pure unit tests for NoteController using MockMvc standaloneSetup (no Spring context).
- * We provide a custom HandlerMethodArgumentResolver to satisfy @AuthenticationPrincipal UserDetails.
- * All test names and comments are in English.
+ * Pure unit tests for NoteController using MockMvc standaloneSetup (no Spring context). We provide
+ * a custom HandlerMethodArgumentResolver to satisfy @AuthenticationPrincipal UserDetails. All test
+ * names and comments are in English.
  */
 @org.junit.jupiter.api.extension.ExtendWith(MockitoExtension.class)
 class NoteControllerStandaloneTest {
@@ -61,10 +62,11 @@ class NoteControllerStandaloneTest {
         }
 
         @Override
-        public Object resolveArgument(MethodParameter parameter,
-                                      ModelAndViewContainer mavContainer,
-                                      NativeWebRequest webRequest,
-                                      WebDataBinderFactory binderFactory) {
+        public Object resolveArgument(
+                MethodParameter parameter,
+                ModelAndViewContainer mavContainer,
+                NativeWebRequest webRequest,
+                WebDataBinderFactory binderFactory) {
             String username = webRequest.getHeader("X-Test-User");
             if (username == null || username.isBlank()) {
                 username = "emma"; // default for tests
@@ -86,14 +88,23 @@ class NoteControllerStandaloneTest {
     // --- Helpers ---
     private AppUser owner(String username) {
         AppUser u = new AppUser();
-        try { AppUser.class.getMethod("setId", Long.class).invoke(u, 1L); } catch (Exception ignore) {}
-        try { AppUser.class.getMethod("setUsername", String.class).invoke(u, username); } catch (Exception ignore) {}
+        try {
+            AppUser.class.getMethod("setId", Long.class).invoke(u, 1L);
+        } catch (Exception ignore) {
+        }
+        try {
+            AppUser.class.getMethod("setUsername", String.class).invoke(u, username);
+        } catch (Exception ignore) {
+        }
         return u;
     }
 
     private Note note(Long id, String title, String content, String username) {
         Note n = new Note(title, content, owner(username));
-        try { Note.class.getMethod("setId", Long.class).invoke(n, id); } catch (Exception ignore) {}
+        try {
+            Note.class.getMethod("setId", Long.class).invoke(n, id);
+        } catch (Exception ignore) {
+        }
         return n;
     }
 
@@ -102,11 +113,7 @@ class NoteControllerStandaloneTest {
     @DisplayName("GET /api/notes should return page with default paging (page=0,size=10)")
     void list_shouldReturnPagedNotes_withDefaultPaging() throws Exception {
         PageRequest expected = PageRequest.of(0, 10);
-        Page<Note> page = new PageImpl<>(
-                List.of(note(10L, "A", "a", "emma")),
-                expected,
-                1
-        );
+        Page<Note> page = new PageImpl<>(List.of(note(10L, "A", "a", "emma")), expected, 1);
 
         given(noteService.listMyNotes(eq("emma"), eq(expected))).willReturn(page);
 
@@ -127,17 +134,10 @@ class NoteControllerStandaloneTest {
     @DisplayName("GET /api/notes should honor page and size query params")
     void list_shouldUseProvidedPaging() throws Exception {
         PageRequest expected = PageRequest.of(2, 5);
-        Page<Note> page = new PageImpl<>(
-                List.of(note(11L, "B", "b", "emma")),
-                expected,
-                13
-        );
+        Page<Note> page = new PageImpl<>(List.of(note(11L, "B", "b", "emma")), expected, 13);
         given(noteService.listMyNotes(eq("emma"), eq(expected))).willReturn(page);
 
-        mvc.perform(get("/api/notes")
-                        .param("page", "2")
-                        .param("size", "5")
-                        .header("X-Test-User", "emma"))
+        mvc.perform(get("/api/notes").param("page", "2").param("size", "5").header("X-Test-User", "emma"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].title", is("B")))
                 .andExpect(jsonPath("$.size", is(5)))
@@ -185,10 +185,10 @@ class NoteControllerStandaloneTest {
     @DisplayName("GET /api/notes/{id} should return 404 when service throws ResponseStatusException(404)")
     void one_shouldPropagate404() throws Exception {
         given(noteService.getOne(eq("emma"), eq(999L)))
-                .willThrow(new ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND, "Note not found"));
+                .willThrow(
+                        new ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND, "Note not found"));
 
-        mvc.perform(get("/api/notes/999").header("X-Test-User", "emma"))
-                .andExpect(status().isNotFound());
+        mvc.perform(get("/api/notes/999").header("X-Test-User", "emma")).andExpect(status().isNotFound());
     }
 
     // --- PUT /api/notes/{id} ---
@@ -215,7 +215,8 @@ class NoteControllerStandaloneTest {
     void update_shouldPropagate404() throws Exception {
         var body = new NoteController.UpsertNote("X", "Y");
         given(noteService.update(eq("emma"), eq(77L), anyString(), anyString()))
-                .willThrow(new ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND, "Note not found"));
+                .willThrow(
+                        new ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND, "Note not found"));
 
         mvc.perform(put("/api/notes/77")
                         .header("X-Test-User", "emma")
@@ -228,8 +229,7 @@ class NoteControllerStandaloneTest {
     @Test
     @DisplayName("DELETE /api/notes/{id} should call service and return 200")
     void delete_shouldInvokeService() throws Exception {
-        mvc.perform(delete("/api/notes/5").header("X-Test-User", "emma"))
-                .andExpect(status().isOk());
+        mvc.perform(delete("/api/notes/5").header("X-Test-User", "emma")).andExpect(status().isOk());
 
         verify(noteService).delete(eq("emma"), eq(5L));
     }
@@ -238,9 +238,9 @@ class NoteControllerStandaloneTest {
     @DisplayName("DELETE /api/notes/{id} should return 404 when service throws not found")
     void delete_shouldPropagate404() throws Exception {
         doThrow(new ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND, "Note not found"))
-                .when(noteService).delete(eq("emma"), eq(404L));
+                .when(noteService)
+                .delete(eq("emma"), eq(404L));
 
-        mvc.perform(delete("/api/notes/404").header("X-Test-User", "emma"))
-                .andExpect(status().isNotFound());
+        mvc.perform(delete("/api/notes/404").header("X-Test-User", "emma")).andExpect(status().isNotFound());
     }
 }

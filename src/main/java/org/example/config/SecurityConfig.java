@@ -1,8 +1,8 @@
 package org.example.config;
 
+import java.util.List;
 import org.example.auth.CustomUserPrincipal;
 import org.example.auth.JwtAuthenticationFilter;
-import org.example.repository.UserRepository;
 import org.example.service.UserLookupService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,14 +17,11 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
-import java.util.List;
 
 /** Security configuration: JWT + username/password auth. */
 @Configuration
@@ -42,16 +39,10 @@ public class SecurityConfig {
         return username -> {
             var user = userLookupService.getByUsernameOrThrow(username);
 
-            var authorities = List.of(
-                    new SimpleGrantedAuthority("ROLE_" + user.getRole().name())
-            );
+            var authorities =
+                    List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
             return new CustomUserPrincipal(
-                    user.getId(),
-                    user.getUsername(),
-                    user.getPasswordHash(),
-                    authorities,
-                    user.isActive()
-            );
+                    user.getId(), user.getUsername(), user.getPasswordHash(), authorities, user.isActive());
         };
     }
 
@@ -70,10 +61,10 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(
-            HttpSecurity http, JwtAuthenticationFilter jwtFilter, AuthenticationProvider authProvider, Environment env) throws Exception {
+            HttpSecurity http, JwtAuthenticationFilter jwtFilter, AuthenticationProvider authProvider, Environment env)
+            throws Exception {
 
-        return http
-                .csrf(csrf -> csrf.disable())
+        return http.csrf(csrf -> csrf.disable())
                 .headers(h -> h.frameOptions(f -> f.disable()))
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // <-- stateless
                 .exceptionHandling(eh -> eh.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))

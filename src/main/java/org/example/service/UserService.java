@@ -1,15 +1,15 @@
 package org.example.service;
 
+import java.util.List;
 import org.example.model.AppUser;
 import org.example.model.Note;
 import org.example.model.Role;
 import org.example.repository.NoteRepository;
 import org.example.repository.UserRepository;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 public class UserService {
@@ -33,21 +33,11 @@ public class UserService {
             throw new IllegalArgumentException("Email already registered");
         }
 
-        AppUser user = new AppUser(
-                username,
-                email,
-                encoderRepo.encode(rawPassword),
-                Role.MEMBER,
-                true
-        );
+        AppUser user = new AppUser(username, email, encoderRepo.encode(rawPassword), Role.MEMBER, true);
 
         AppUser saved = createUser(user);
 
-        Note welcome = new Note(
-                "Welcome",
-                "Welcome to Note Service, " + saved.getUsername() + "!",
-                saved.getId()
-        );
+        Note welcome = new Note("Welcome", "Welcome to Note Service, " + saved.getUsername() + "!", saved.getId());
         notesRepo.save(welcome);
     }
 
@@ -66,5 +56,12 @@ public class UserService {
 
     public void setActive(Long userId, boolean active) {
         usersRepo.setActive(userId, active);
+    }
+
+    /** Load user by username, used by AI endpoints and security context. */
+    public AppUser loadByUsername(String username) {
+        return usersRepo
+                .findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
     }
 }

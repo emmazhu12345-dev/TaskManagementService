@@ -6,5 +6,8 @@ import org.springframework.stereotype.Service;
 @Profile("dev")
 @Service
 public class DevWelcomeMessageService implements WelcomeMessageService {
-    @Override public String message() { return "👩‍💻 Running in DEV mode"; }
+    @Override
+    public String message() {
+        return "👩‍💻 Running in DEV mode";
+    }
 }
