@@ -6,10 +6,11 @@ import org.example.model.Note;
 import org.example.model.Role;
 import org.example.repository.NoteRepository;
 import org.example.repository.UserRepository;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class UserService {
@@ -27,10 +28,10 @@ public class UserService {
     @Transactional
     public void register(String username, String email, String rawPassword) {
         if (usersRepo.existsByUsername(username)) {
-            throw new IllegalArgumentException("Username already taken");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already taken");
         }
         if (usersRepo.existsByEmail(email)) {
-            throw new IllegalArgumentException("Email already registered");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already registered");
         }
 
         AppUser user = new AppUser(username, email, encoderRepo.encode(rawPassword), Role.MEMBER, true);
@@ -62,13 +63,13 @@ public class UserService {
     public AppUser loadByUsername(String username) {
         return usersRepo
                 .findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found: " + username));
     }
 
     /** Load user by ID. */
     public AppUser loadById(Long userId) {
         return usersRepo
                 .findById(userId)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + userId));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found with id: " + userId));
     }
 }

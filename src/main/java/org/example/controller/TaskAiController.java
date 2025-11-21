@@ -15,8 +15,10 @@ import org.example.service.TaskService;
 import org.example.service.UserService;
 import org.example.utils.TaskMapper;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/tasks/ai")
@@ -44,7 +46,7 @@ public class TaskAiController {
         // Get daily stats
         var stats = analyticsService
                 .getDailyStats(targetDate)
-                .orElseThrow(() -> new IllegalArgumentException("No stats found for date: " + targetDate));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No stats found for date: " + targetDate));
 
         // Generate AI summary
         String summary = aiTaskService.generateDailySummary(user, stats);
