@@ -1,4 +1,4 @@
-package org.example.controller;
+package org.example.controller.errorHandling;
 
 import java.time.Instant;
 import org.springframework.http.HttpStatus;

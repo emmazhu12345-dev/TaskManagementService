@@ -1,4 +1,4 @@
-package org.example.controller;
+package org.example.controller.errorHandling;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
