@@ -164,6 +164,8 @@ docker exec -it tms-postgres bash
 psql -U tmsuser -d tmsdb
 
 ### export to the enviroment
+https://platform.openai.com/docs/quickstart
+
 ```
 export OPENAI_API_KEY=sk-xxxx
 

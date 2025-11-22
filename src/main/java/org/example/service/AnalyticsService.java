@@ -72,6 +72,7 @@ public class AnalyticsService {
         generateAiSummaryAsync(event);
 
         log.info("Done to generateAiSummaryAsync");
+        // TODO: STORE IN DB
     }
 
     /**
