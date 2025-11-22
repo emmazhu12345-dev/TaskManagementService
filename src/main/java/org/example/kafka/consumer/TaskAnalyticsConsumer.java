@@ -9,8 +9,8 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 /**
- * Consumer responsible for analytics, metrics, and reporting.
- * This consumer processes events and aggregates business statistics.
+ * Consumer responsible for analytics, metrics, and reporting. This consumer processes events and
+ * aggregates business statistics.
  */
 @Service
 @Slf4j
@@ -25,8 +25,7 @@ public class TaskAnalyticsConsumer {
     @KafkaListener(
             topics = "tms.task.events.v1",
             groupId = "tms-analytics-service",
-            containerFactory = "taskEventListenerFactory"
-    )
+            containerFactory = "taskEventListenerFactory")
     public void onMessage(TaskEvent event) {
 
         if (event == null || event.getPayload() == null) {
@@ -55,10 +54,13 @@ public class TaskAnalyticsConsumer {
                 "[Analytics] Handling TASK_CREATED — date={}, taskId={}, ownerId={}",
                 p.getCreatedAt(),
                 p.getTaskId(),
-                p.getOwnerId()
-        );
+                p.getOwnerId());
 
+        // Existing analytics aggregation
         analyticsService.recordTaskCreated();
+
+        // If you want, you could also update daily stats here in the future.
+        // analyticsService.updateDailyStats(event);
     }
 
     private void handleTaskCompleted(TaskEvent event) {
@@ -67,10 +69,14 @@ public class TaskAnalyticsConsumer {
                 "[Analytics] Handling TASK_COMPLETED — date={}, taskId={}, ownerId={}",
                 p.getUpdatedAt(),
                 p.getTaskId(),
-                p.getOwnerId()
-        );
+                p.getOwnerId());
 
+        // Existing analytics aggregation
         analyticsService.recordTaskCompleted();
+
+        // New: update daily stats and trigger AI daily summary generation
+        // This method will use AiTaskService internally.
+        analyticsService.recordDailyStatsAndGenerateSummary(event);
     }
 
     private void handleTaskRemoved(TaskEvent event) {
@@ -82,8 +88,7 @@ public class TaskAnalyticsConsumer {
                 p.getUpdatedAt(),
                 p.getTaskId(),
                 p.getOwnerId(),
-                reason
-        );
+                reason);
 
         analyticsService.recordTaskRemoved(reason);
     }
@@ -94,8 +99,7 @@ public class TaskAnalyticsConsumer {
                 "[Analytics] Handling TASK_UPDATED (no aggregation yet) — taskId={}, ownerId={}, status={}",
                 p.getTaskId(),
                 p.getOwnerId(),
-                p.getStatus()
-        );
+                p.getStatus());
 
         // If you want to track update stats in the future,
         // you can add a method like:

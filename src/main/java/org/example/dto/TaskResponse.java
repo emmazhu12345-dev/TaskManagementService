@@ -1,9 +1,8 @@
 package org.example.dto;
 
+import java.time.Instant;
 import org.example.model.TaskPriority;
 import org.example.model.TaskStatus;
-
-import java.time.Instant;
 
 public record TaskResponse(
         Long id,
@@ -13,5 +12,4 @@ public record TaskResponse(
         TaskPriority priority,
         Instant dueDate,
         Instant createdAt,
-        Instant updatedAt
-) {}
+        Instant updatedAt) {}

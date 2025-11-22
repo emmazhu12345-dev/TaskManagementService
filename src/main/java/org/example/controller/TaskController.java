@@ -7,18 +7,13 @@ import org.example.dto.PagedResponse;
 import org.example.dto.TaskResponse;
 import org.example.dto.UpdateTaskRequest;
 import org.example.dto.UpdateTaskStatusRequest;
-import org.example.model.AppUser;
 import org.example.service.TaskService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
-/**
- * REST controller for Task-related endpoints.
- */
+/** REST controller for Task-related endpoints. */
 @RestController
 @RequestMapping("/api/tasks")
 public class TaskController {
@@ -34,9 +29,7 @@ public class TaskController {
     // ======================================
     @PostMapping
     public TaskResponse createTask(
-            @AuthenticationPrincipal CustomUserPrincipal user,
-            @RequestBody CreateTaskRequest request
-    ) {
+            @AuthenticationPrincipal CustomUserPrincipal user, @RequestBody CreateTaskRequest request) {
         long ownerId = user.getId();
         return taskService.createTask(ownerId, request);
     }
@@ -48,22 +41,17 @@ public class TaskController {
     public PagedResponse<TaskResponse> listMyTasks(
             @AuthenticationPrincipal CustomUserPrincipal user,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
-    ) {
+            @RequestParam(defaultValue = "10") int size) {
         // todo: add validations
         Pageable pageable = PageRequest.of(page, size);
         return taskService.listTasksForUser(user.getId(), pageable);
     }
 
-
     // ======================================
     // Get a single Task
     // ======================================
     @GetMapping("/{id}")
-    public TaskResponse getTask(
-            @AuthenticationPrincipal CustomUserPrincipal user,
-            @PathVariable long id
-    ) {
+    public TaskResponse getTask(@AuthenticationPrincipal CustomUserPrincipal user, @PathVariable long id) {
         long ownerId = user.getId();
         return taskService.getTask(ownerId, id);
     }
@@ -75,8 +63,7 @@ public class TaskController {
     public TaskResponse updateTask(
             @AuthenticationPrincipal CustomUserPrincipal user,
             @PathVariable long id,
-            @RequestBody UpdateTaskRequest request
-    ) {
+            @RequestBody UpdateTaskRequest request) {
         long ownerId = user.getId();
         return taskService.updateTask(ownerId, id, request);
     }
@@ -88,8 +75,7 @@ public class TaskController {
     public TaskResponse updateTaskStatus(
             @AuthenticationPrincipal CustomUserPrincipal user,
             @PathVariable long id,
-            @RequestBody UpdateTaskStatusRequest request
-    ) {
+            @RequestBody UpdateTaskStatusRequest request) {
         long ownerId = user.getId();
         return taskService.updateTaskStatus(ownerId, id, request);
     }
@@ -98,10 +84,7 @@ public class TaskController {
     // Delete a Task
     // ======================================
     @DeleteMapping("/{id}")
-    public void deleteTask(
-            @AuthenticationPrincipal CustomUserPrincipal user,
-            @PathVariable long id
-    ) {
+    public void deleteTask(@AuthenticationPrincipal CustomUserPrincipal user, @PathVariable long id) {
         long ownerId = user.getId();
         taskService.deleteTask(ownerId, id);
     }

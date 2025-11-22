@@ -4,9 +4,6 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.time.Instant;
@@ -14,6 +11,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 @Service
 public class JwtService {
@@ -43,7 +42,7 @@ public class JwtService {
         return Jwts.builder()
                 .setClaims(Map.of("typ", "access"))
                 .setSubject(username)
-                .setId(UUID.randomUUID().toString())          // <- add jti
+                .setId(UUID.randomUUID().toString()) // <- add jti
                 .setIssuedAt(Date.from(now))
                 .setExpiration(Date.from(expiry))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
@@ -60,7 +59,7 @@ public class JwtService {
         return Jwts.builder()
                 .setClaims(Map.of("typ", "refresh"))
                 .setSubject(username)
-                .setId(UUID.randomUUID().toString())          // <- add jti
+                .setId(UUID.randomUUID().toString()) // <- add jti
                 .setIssuedAt(Date.from(now))
                 .setExpiration(Date.from(expiry))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
@@ -75,9 +74,7 @@ public class JwtService {
         return extractAllClaims(token).getSubject();
     }
 
-    /**
-     * Extract JWT ID (jti) from token.
-     */
+    /** Extract JWT ID (jti) from token. */
     public String extractJti(String token) {
         return extractAllClaims(token).getId();
     }

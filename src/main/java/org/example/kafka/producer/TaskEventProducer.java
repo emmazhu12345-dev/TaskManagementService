@@ -6,10 +6,7 @@ import org.example.model.Task;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
-/**
- * Publishes TaskEvent messages to Kafka.
- * Encapsulates event building and sending logic.
- */
+/** Publishes TaskEvent messages to Kafka. Encapsulates event building and sending logic. */
 @Component
 @Slf4j
 public class TaskEventProducer {
@@ -48,9 +45,7 @@ public class TaskEventProducer {
         log.info("Published TaskEvent: type={}, taskId={}", event.getType(), taskId);
     }
 
-    private TaskEvent buildEvent(Task task,
-                                 TaskEventType type,
-                                 TaskRemovalReason removalReason) {
+    private TaskEvent buildEvent(Task task, TaskEventType type, TaskRemovalReason removalReason) {
 
         TaskEventPayload payload = TaskEventPayload.builder()
                 .taskId(task.getId())

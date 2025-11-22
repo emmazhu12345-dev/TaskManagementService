@@ -1,20 +1,18 @@
 package org.example.repository.impl;
 
-
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 import org.example.dao.AnalyticsDao;
 import org.example.kafka.event.TaskRemovalReason;
 import org.example.model.TaskDailyStats;
 import org.example.repository.AnalyticsRepository;
-import org.springframework.stereotype.Repository;
-import java.time.LocalDate;
-import java.util.Optional;
-
 import org.jdbi.v3.core.Jdbi;
+import org.springframework.stereotype.Repository;
 
 /**
- * Repository implementation for aggregated analytics.
- * Delegates SQL work to AnalyticsDao using jdbi.withExtension,
- * following the same style as TaskRepositoryImpl.
+ * Repository implementation for aggregated analytics. Delegates SQL work to AnalyticsDao using
+ * jdbi.withExtension, following the same style as TaskRepositoryImpl.
  */
 @Repository
 public class AnalyticsRepositoryImpl implements AnalyticsRepository {
@@ -27,16 +25,12 @@ public class AnalyticsRepositoryImpl implements AnalyticsRepository {
 
     @Override
     public void incrementDailyCreatedCount(LocalDate date) {
-        jdbi.useExtension(AnalyticsDao.class, dao ->
-                dao.incrementDailyCreatedCount(date)
-        );
+        jdbi.useExtension(AnalyticsDao.class, dao -> dao.incrementDailyCreatedCount(date));
     }
 
     @Override
     public void incrementDailyCompletedCount(LocalDate date) {
-        jdbi.useExtension(AnalyticsDao.class, dao ->
-                dao.incrementDailyCompletedCount(date)
-        );
+        jdbi.useExtension(AnalyticsDao.class, dao -> dao.incrementDailyCompletedCount(date));
     }
 
     @Override
@@ -57,16 +51,16 @@ public class AnalyticsRepositoryImpl implements AnalyticsRepository {
             }
         }
 
-        jdbi.useExtension(AnalyticsDao.class, dao ->
-                dao.incrementDailyRemovedCount(date, deletedInc, canceledInc)
-        );
+        jdbi.useExtension(AnalyticsDao.class, dao -> dao.incrementDailyRemovedCount(date, deletedInc, canceledInc));
     }
 
     @Override
     public Optional<TaskDailyStats> findDailyStats(LocalDate date) {
-        return jdbi.withExtension(AnalyticsDao.class,
-                dao -> Optional.ofNullable(dao.findStatsByDate(date))
-        );
+        return jdbi.withExtension(AnalyticsDao.class, dao -> Optional.ofNullable(dao.findStatsByDate(date)));
+    }
+
+    @Override
+    public List<TaskDailyStats> findStatsByDateRange(LocalDate startDate, LocalDate endDate) {
+        return jdbi.withExtension(AnalyticsDao.class, dao -> dao.findStatsByDateRange(startDate, endDate));
     }
 }
-

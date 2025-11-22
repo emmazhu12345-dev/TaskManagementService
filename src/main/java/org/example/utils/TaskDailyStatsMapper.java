@@ -3,9 +3,7 @@ package org.example.utils;
 import org.example.dto.TaskDailyStatsResponse;
 import org.example.model.TaskDailyStats;
 
-/**
- * Mapper for converting TaskDailyStats domain model into TaskDailyStatsResponse DTO.
- */
+/** Mapper for converting TaskDailyStats domain model into TaskDailyStatsResponse DTO. */
 public class TaskDailyStatsMapper {
 
     public static TaskDailyStatsResponse toResponse(TaskDailyStats stats) {
@@ -17,7 +15,6 @@ public class TaskDailyStatsMapper {
                 stats.getRemovedDeletedCount(),
                 stats.getRemovedCanceledCount(),
                 stats.getCreatedAt(),
-                stats.getUpdatedAt()
-        );
+                stats.getUpdatedAt());
     }
 }

@@ -21,9 +21,10 @@ public class NoteController {
     public record UpsertNote(String title, String content) {}
 
     @GetMapping
-    public Page<Note> list(@AuthenticationPrincipal UserDetails principal,
-                           @RequestParam(defaultValue = "0") int page,
-                           @RequestParam(defaultValue = "10") int size) {
+    public Page<Note> list(
+            @AuthenticationPrincipal UserDetails principal,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
         return noteService.listMyNotes(principal.getUsername(), PageRequest.of(page, size));
     }
 
@@ -38,7 +39,8 @@ public class NoteController {
     }
 
     @PutMapping("/{id}")
-    public Note update(@AuthenticationPrincipal UserDetails principal, @PathVariable Long id, @RequestBody UpsertNote body) {
+    public Note update(
+            @AuthenticationPrincipal UserDetails principal, @PathVariable Long id, @RequestBody UpsertNote body) {
         return noteService.update(principal.getUsername(), id, body.title(), body.content());
     }
 

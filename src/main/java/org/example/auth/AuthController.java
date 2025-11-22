@@ -1,6 +1,8 @@
 package org.example.auth;
 
 import jakarta.servlet.http.HttpServletRequest;
+import java.time.Instant;
+import java.util.Map;
 import org.example.service.TokenBlocklistService;
 import org.example.service.UserService;
 import org.springframework.http.ResponseEntity;
@@ -8,14 +10,12 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.Instant;
-import java.util.Map;
-
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
 
     public record RegisterRequest(String username, String email, String password) {}
+
     public record LoginRequest(String username, String password) {}
 
     // login & refresh response,：access + refresh
@@ -29,10 +29,11 @@ public class AuthController {
     private final UserService userService;
     private final TokenBlocklistService tokenBlocklistService;
 
-    public AuthController(AuthenticationManager authManager,
-                          JwtService jwtService,
-                          UserService userService,
-                          TokenBlocklistService tokenBlocklistService) {
+    public AuthController(
+            AuthenticationManager authManager,
+            JwtService jwtService,
+            UserService userService,
+            TokenBlocklistService tokenBlocklistService) {
         this.authManager = authManager;
         this.jwtService = jwtService;
         this.userService = userService;
@@ -46,9 +47,7 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
-    /**
-     * Login: return access token + refresh token
-     */
+    /** Login: return access token + refresh token */
     @PostMapping("/login")
     public TokenResponse login(@RequestBody LoginRequest req) {
         var auth = new UsernamePasswordAuthenticationToken(req.username(), req.password());
@@ -60,9 +59,7 @@ public class AuthController {
         return new TokenResponse(accessToken, refreshToken);
     }
 
-    /**
-     * Logout: put current token into blocklist
-     */
+    /** Logout: put current token into blocklist */
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
@@ -81,40 +78,30 @@ public class AuthController {
     }
 
     /**
-     * Refresh: use refresh token to get a new access token + refresh token
-     * - Accept token from Authorization header OR request body
-     * - Rotate refresh token: old one is added to blocklist
+     * Refresh: use refresh token to get a new access token + refresh token - Accept token from
+     * Authorization header OR request body - Rotate refresh token: old one is added to blocklist
      */
     @PostMapping("/refresh")
-    public ResponseEntity<?> refresh(HttpServletRequest request,
-                                     @RequestBody(required = false) RefreshRequest body) {
+    public ResponseEntity<?> refresh(HttpServletRequest request, @RequestBody(required = false) RefreshRequest body) {
         String token = extractTokenFromHeaderOrBody(request, body);
 
         if (token == null || token.isBlank()) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(Map.of("error", "Missing refresh token"));
+            return ResponseEntity.badRequest().body(Map.of("error", "Missing refresh token"));
         }
 
         // 1) Must be a refresh token
         if (!jwtService.isTokenType(token, "refresh")) {
-            return ResponseEntity
-                    .status(401)
-                    .body(Map.of("error", "Invalid token type. Expecting refresh token."));
+            return ResponseEntity.status(401).body(Map.of("error", "Invalid token type. Expecting refresh token."));
         }
 
         // 2) Cannot be blocklisted
         if (tokenBlocklistService.isBlocked(token)) {
-            return ResponseEntity
-                    .status(401)
-                    .body(Map.of("error", "Refresh token has been invalidated."));
+            return ResponseEntity.status(401).body(Map.of("error", "Refresh token has been invalidated."));
         }
 
         // 3) Cannot be expired
         if (jwtService.isTokenExpired(token)) {
-            return ResponseEntity
-                    .status(401)
-                    .body(Map.of("error", "Refresh token has expired."));
+            return ResponseEntity.status(401).body(Map.of("error", "Refresh token has expired."));
         }
 
         // 4) Load username from token and generate new tokens
@@ -132,9 +119,7 @@ public class AuthController {
         return ResponseEntity.ok(new TokenResponse(newAccessToken, newRefreshToken));
     }
 
-    /**
-     * Helper: get refresh token either from Authorization header or request body
-     */
+    /** Helper: get refresh token either from Authorization header or request body */
     private String extractTokenFromHeaderOrBody(HttpServletRequest request, RefreshRequest body) {
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {

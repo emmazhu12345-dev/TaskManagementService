@@ -1,14 +1,13 @@
 package org.example.repository.impl;
 
+import java.util.List;
+import java.util.Optional;
 import org.example.dao.NoteDao;
 import org.example.model.Note;
 import org.example.repository.NoteRepository;
 import org.jdbi.v3.core.Jdbi;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
-import java.util.Optional;
 
 @Repository
 public class NoteRepositoryImpl implements NoteRepository {
@@ -25,10 +24,8 @@ public class NoteRepositoryImpl implements NoteRepository {
         int size = pageable.getPageSize();
         int offset = page * size;
 
-        List<Note> content = jdbi.withExtension(NoteDao.class,
-                dao -> dao.findByOwnerIdPaged(ownerId, size, offset));
-        long total = jdbi.withExtension(NoteDao.class,
-                dao -> dao.countByOwnerId(ownerId));
+        List<Note> content = jdbi.withExtension(NoteDao.class, dao -> dao.findByOwnerIdPaged(ownerId, size, offset));
+        long total = jdbi.withExtension(NoteDao.class, dao -> dao.countByOwnerId(ownerId));
 
         return new PageImpl<>(content, pageable, total);
     }
