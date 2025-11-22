@@ -10,8 +10,10 @@ import org.example.model.AppUser;
 import org.example.model.TaskDailyStats;
 import org.example.repository.AnalyticsRepository;
 import org.example.utils.TaskDailyStatsMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @Slf4j
@@ -42,7 +44,7 @@ public class AnalyticsService {
     public TaskDailyStatsResponse getDailyStatsResponse(LocalDate date) {
         TaskDailyStats stats = repository
                 .findDailyStats(date)
-                .orElseThrow(() -> new IllegalArgumentException("No stats found for date: " + date));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No stats found for date: " + date));
 
         return TaskDailyStatsMapper.toResponse(stats);
     }

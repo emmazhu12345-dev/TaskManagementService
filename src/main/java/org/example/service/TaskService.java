@@ -15,8 +15,10 @@ import org.example.model.TaskStatus;
 import org.example.repository.TaskRepository;
 import org.example.utils.TaskMapper;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 /** Service layer for Task business logic. */
 @Service
@@ -81,7 +83,7 @@ public class TaskService {
     public TaskResponse getTask(long ownerId, long taskId) {
         Task task = taskRepository
                 .findTaskByIdAndOwner(taskId, ownerId)
-                .orElseThrow(() -> new IllegalArgumentException("Task not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found"));
         return TaskMapper.toResponse(task);
     }
 
@@ -92,7 +94,7 @@ public class TaskService {
     public TaskResponse updateTask(long ownerId, long taskId, UpdateTaskRequest request) {
         Task task = taskRepository
                 .findTaskByIdAndOwner(taskId, ownerId)
-                .orElseThrow(() -> new IllegalArgumentException("Task not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found"));
 
         task.setTitle(request.title());
         task.setDescription(request.description());
@@ -119,7 +121,7 @@ public class TaskService {
     public TaskResponse updateTaskStatus(long ownerId, long taskId, UpdateTaskStatusRequest request) {
         Task task = taskRepository
                 .findTaskByIdAndOwner(taskId, ownerId)
-                .orElseThrow(() -> new IllegalArgumentException("Task not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found"));
 
         task.setStatus(request.status());
         task.setUpdatedAt(Instant.now());
@@ -149,11 +151,11 @@ public class TaskService {
         // Fetch the task first so we can publish a meaningful event
         Task task = taskRepository
                 .findTaskByIdAndOwner(taskId, ownerId)
-                .orElseThrow(() -> new IllegalArgumentException("Task not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found"));
 
         boolean deleted = taskRepository.deleteTask(taskId, ownerId);
         if (!deleted) {
-            throw new IllegalArgumentException("Task not found");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found");
         }
         // Publish a unified removal event (delete = hard removal)
         taskEventProducer.publishTaskRemoved(task, TaskRemovalReason.DELETED);
@@ -186,6 +188,6 @@ public class TaskService {
     public Task getTaskEntity(long ownerId, long taskId) {
         return taskRepository
                 .findTaskByIdAndOwner(taskId, ownerId)
-                .orElseThrow(() -> new IllegalArgumentException("Task not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found"));
     }
 }
